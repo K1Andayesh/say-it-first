@@ -11,6 +11,11 @@ import {
   getApiBaseUrl,
 } from "@/services/api/api-client";
 import { diagnosticLog } from "@/services/diagnostics/diagnostic-log";
+import {
+  inboundAudioStatsFromReport,
+  summarizeInboundAudioQuality,
+  type InboundAudioStatsSnapshot,
+} from "./realtime-audio-quality";
 import { RealtimeAudioSession } from "./realtime-audio-session";
 import {
   idleAssistantAudioGateState,
@@ -92,6 +97,8 @@ export class RealtimeVoiceClient {
   private assistantAudioGate: AssistantAudioGateState = idleAssistantAudioGateState;
   private microphoneEnabled: boolean | null = null;
   private lastSpeechStoppedAt: number | null = null;
+  private qualityBaseline: Promise<InboundAudioStatsSnapshot | null> | null = null;
+  private qualityUnavailableLogged = false;
 
   public constructor(private readonly callbacks: RealtimeClientCallbacks) {}
 
@@ -102,6 +109,8 @@ export class RealtimeVoiceClient {
     this.assistantAudioGate = idleAssistantAudioGateState;
     this.microphoneEnabled = null;
     this.lastSpeechStoppedAt = null;
+    this.qualityBaseline = null;
+    this.qualityUnavailableLogged = false;
     this.callbacks.onConnectionState("connecting");
     const correlation = createCorrelation();
     const startedAt = performance.now();
@@ -197,6 +206,7 @@ export class RealtimeVoiceClient {
       await peerConnection.setRemoteDescription(
         new RTCSessionDescription({ type: "answer", sdp: answerSdp }),
       );
+      await this.captureQualityBaseline();
       diagnosticLog.record("info", "realtime.connection.negotiated", {
         requestId: response.headers.get("x-request-id") ?? correlation.requestId,
         traceId: response.headers.get("x-trace-id") ?? correlation.traceId,
@@ -233,6 +243,14 @@ export class RealtimeVoiceClient {
       this.lastSpeechStoppedAt = null;
     }
 
+    if (event.type === "output_audio_buffer.started") {
+      this.qualityBaseline = this.readInboundAudioStats();
+    } else if (event.type === "output_audio_buffer.stopped") {
+      const baseline = this.qualityBaseline;
+      this.qualityBaseline = null;
+      void this.recordTurnAudioQuality(baseline);
+    }
+
     const previous = this.assistantAudioGate;
     const next = nextAssistantAudioGateState(previous, event);
     if (next !== previous) {
@@ -259,6 +277,53 @@ export class RealtimeVoiceClient {
         },
       );
     }
+  }
+
+  private async captureQualityBaseline(): Promise<void> {
+    this.qualityBaseline = this.readInboundAudioStats();
+    await this.qualityBaseline;
+  }
+
+  private async readInboundAudioStats(): Promise<InboundAudioStatsSnapshot | null> {
+    const peerConnection = this.peerConnection;
+    if (!peerConnection || peerConnection.connectionState === "closed") return null;
+
+    try {
+      const report: unknown = await peerConnection.getStats();
+      if (!(report instanceof Map)) return null;
+      return inboundAudioStatsFromReport(report);
+    } catch (error) {
+      if (!this.qualityUnavailableLogged) {
+        this.qualityUnavailableLogged = true;
+        diagnosticLog.record("warn", "realtime.quality.unavailable", {
+          errorType: error instanceof Error ? error.name : "UnknownError",
+        });
+      }
+      return null;
+    }
+  }
+
+  private async recordTurnAudioQuality(
+    baseline: Promise<InboundAudioStatsSnapshot | null> | null,
+  ): Promise<void> {
+    const start = await baseline;
+    const end = await this.readInboundAudioStats();
+    if (!start || !end) {
+      if (!this.qualityUnavailableLogged) {
+        this.qualityUnavailableLogged = true;
+        diagnosticLog.record("warn", "realtime.quality.unavailable", {
+          errorType: "InboundStatsMissing",
+        });
+      }
+      return;
+    }
+
+    const summary = summarizeInboundAudioQuality(start, end);
+    diagnosticLog.record(
+      summary.quality === "degraded" ? "warn" : "info",
+      "realtime.turn.quality",
+      summary,
+    );
   }
 
   private syncMicrophone(reason: string): void {
@@ -294,6 +359,7 @@ export class RealtimeVoiceClient {
     this.localStream?.getTracks().forEach((track) => track.stop());
     this.localStream?.release();
     this.localStream = null;
+    this.qualityBaseline = null;
     this.peerConnection?.close();
     this.peerConnection = null;
     this.audioSession.stop();

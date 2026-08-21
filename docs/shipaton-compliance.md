@@ -37,8 +37,15 @@ written consent.
 
 ## Technical evidence
 
-- Physical-device realtime test: preliminary pass on Pixel 10 Pro XL; mandatory uninterrupted
-  five-minute run and human audible-completion confirmation remain pending
+- Physical-device realtime test: a 5m17s Pixel 10 Pro XL rehearsal completed with 29 transcript
+  turns, clean WebRTC teardown, and grounded evaluation, but one assistant reply had transient
+  audible corruption; the stable-session gate therefore remains open
+- Controlled audible retest: short, approximately 30-second, and approximately 50-second assistant
+  replies all reached their spoken completion markers without cutting out, skipping, distortion,
+  silence, or repetition
+- Per-turn WebRTC receiver evidence: the baseline and long controlled replies were classified
+  `good`; the baseline received 525 packets and the long reply received 1,805 packets, both with
+  zero packet loss, 1 ms reported jitter, and zero concealed samples or concealment events
 - OpenAI project/API configuration: available in ignored local runtime configuration; no provider
   secret is present in the mobile bundle
 - Corrected rehearsal evidence: six user turns and six assistant replies; all assistant responses
@@ -52,7 +59,7 @@ written consent.
   confidence 0.98, and the mobile reached the completed state
 - Standard provider secret absent from mobile bundle: architecture enforced; build audit pending
 - Automated verification: API lint/typecheck/test/build and mobile lint/typecheck/test passed after
-  the audio-completion repair
+  the audio-completion repair; the final full gate for per-turn quality telemetry is pending
 
 ## Primary category evidence matrix
 

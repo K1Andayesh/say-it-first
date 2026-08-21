@@ -57,10 +57,24 @@ connections and keeps the standard API key on the backend.
   encouraging preliminary evidence, not a statistically defensible P95.
 - The transcript reached grounded evaluation with all 12 turns, evaluator confidence 0.98, and a
   clean completed UI state.
+- A later uninterrupted 5m17s physical-device rehearsal produced 29 transcript turns, clean
+  teardown, and grounded evaluation with confidence 0.97. One assistant reply nevertheless had
+  transient audible corruption, so duration alone did not close the stability criterion.
+- The client now samples inbound WebRTC RTP counters around every assistant turn and records only
+  packet, jitter-buffer, and audio-concealment metrics. It does not record audio or transcript
+  content in this telemetry.
+- A controlled follow-up exercised short, approximately 30-second, and approximately 50-second
+  replies with explicit spoken completion markers. The product owner heard all three replies finish
+  without cutout, silence, distortion, skipping, or repetition.
+- The controlled baseline and long replies were classified `good`. The baseline received 525
+  packets and the long reply received 1,805; both reported zero packet loss, 1 ms jitter, and zero
+  concealed samples or concealment events.
 
-An uninterrupted five-minute corrected rehearsal, human confirmation of audible completion,
-physical-device lifecycle/interruption checks, a larger latency sample, and measured representative
-practice cost remain unresolved. The ADR stays proposed until those explicit exit conditions pass.
+The five-minute duration target and a controlled long-reply retest have now been demonstrated, but
+the five-minute run's isolated audible corruption keeps the stable-session criterion open.
+Physical-device lifecycle/interruption checks, broader network-condition coverage, a larger latency
+sample, and measured representative practice cost also remain unresolved. The ADR stays proposed
+until those explicit exit conditions pass.
 
 ## Fallback
 

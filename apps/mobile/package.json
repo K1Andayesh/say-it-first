@@ -11,7 +11,7 @@
     "prebuild:android": "expo prebuild --platform android --clean",
     "prestart": "pnpm --filter @say-it-first/contracts build && pnpm --filter @say-it-first/domain build",
     "start": "expo start --dev-client",
-    "test": "vitest run src/services/realtime/realtime-events.test.ts",
+    "test": "vitest run src/services/realtime",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

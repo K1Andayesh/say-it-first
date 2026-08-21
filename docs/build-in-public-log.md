@@ -67,3 +67,40 @@ instead of imposing a transport-level output ceiling.
 ### Public links
 
 - Pending
+
+## 2026-08-21 — Measure what the listener actually receives
+
+### Hypothesis
+
+Provider completion events cannot distinguish a fully rendered reply from packet loss, jitter, or
+decoder concealment on the phone.
+
+### What we built or tested
+
+Added privacy-safe per-turn inbound WebRTC diagnostics for received and lost packets, jitter,
+jitter-buffer delay, concealed samples, concealment events, and timing adjustments. Then ran a
+controlled physical-device test with short, approximately 30-second, and approximately 50-second
+assistant replies, each ending with an explicit spoken completion marker.
+
+### Evidence
+
+The product owner heard all three markers without cutout, silence, distortion, skipping, or
+repetition. The baseline received 525 packets and the long reply received 1,805 packets; both had
+zero packet loss, 1 ms jitter, and zero concealed samples or concealment events. The long reply's
+mean jitter-buffer delay was 79.91 ms. No audio or transcript content was added to telemetry.
+
+### Feedback
+
+An earlier 5m17s rehearsal completed at the protocol level but contained one transient audible
+corruption. That result remains part of the evidence and prevents a premature claim that playback
+is permanently resolved.
+
+### Decision
+
+Retain human audible-completion checks and per-turn receiver metrics together. A future corruption
+can now be separated into network delivery, decoder concealment, provider completion, and native
+audio-route evidence without retaining sensitive conversation content.
+
+### Public links
+
+- Pending
