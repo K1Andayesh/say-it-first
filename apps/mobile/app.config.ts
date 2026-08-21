@@ -4,7 +4,7 @@ const configuredAndroidPackage: unknown = process.env.EXPO_PUBLIC_ANDROID_PACKAG
 const androidPackage =
   typeof configuredAndroidPackage === "string" && configuredAndroidPackage.trim()
     ? configuredAndroidPackage.trim()
-    : "com.devectus.sayitfirst.dev";
+    : "app.sayitfirst.dev";
 
 const config: ExpoConfig = {
   name: "Say It First · Lab",
