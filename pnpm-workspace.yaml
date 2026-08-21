@@ -1,0 +1,14 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Keep React Native CMake paths below Windows' practical path limits.
+# This resolves to D:\.pnpm-virtual\sif2 from this workspace.
+virtualStoreDir: ../../.pnpm-virtual/sif2
+virtualStoreDirMaxLength: 32
+
+allowBuilds:
+  esbuild: true
+
+onlyBuiltDependencies:
+  - esbuild

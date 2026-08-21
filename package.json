@@ -1,0 +1,29 @@
+{
+  "name": "say-it-first",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Say It First - practise difficult management conversations before the stakes are real.",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "build": "pnpm -r --if-present build",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "dev:api": "pnpm --filter @say-it-first/api dev",
+    "dev:mobile": "pnpm --filter @say-it-first/mobile start",
+    "lint": "pnpm -r --if-present lint",
+    "test": "pnpm -r --if-present test",
+    "typecheck": "pnpm -r --if-present typecheck"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/node": "^24.10.4",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "tsx": "^4.23.12",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.48.1",
+    "vitest": "^4.1.11"
+  }
+}

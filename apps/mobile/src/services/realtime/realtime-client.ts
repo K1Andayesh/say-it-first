@@ -1,0 +1,303 @@
+import {
+  mediaDevices,
+  RTCPeerConnection,
+  RTCSessionDescription,
+  type MediaStream,
+} from "react-native-webrtc";
+
+import {
+  createCorrelation,
+  fetchWithTimeout,
+  getApiBaseUrl,
+} from "@/services/api/api-client";
+import { diagnosticLog } from "@/services/diagnostics/diagnostic-log";
+import { RealtimeAudioSession } from "./realtime-audio-session";
+import {
+  idleAssistantAudioGateState,
+  nextAssistantAudioGateState,
+  parseRealtimeEvent,
+  responseCompletionFromRealtimeEvent,
+  type AssistantAudioGateState,
+  type RealtimeEvent,
+} from "./realtime-events";
+
+export type RealtimeConnectionState =
+  | "connecting"
+  | "connected"
+  | "disconnected"
+  | "failed"
+  | "closed";
+
+export type RealtimeClientCallbacks = {
+  onConnectionState(state: RealtimeConnectionState): void;
+  onEvent(event: RealtimeEvent): void;
+  onError(error: Error): void;
+};
+
+type StartRealtimeInput = {
+  scenarioId: string;
+  personaId: string;
+  anonymousUserId: string;
+};
+
+type TrackEventShape = { track: { kind: string }; streams: readonly unknown[] };
+type MessageEventShape = { data: unknown };
+type OfferDescription = { type: "offer"; sdp: string };
+
+function isTrackEvent(value: unknown): value is TrackEventShape {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Partial<TrackEventShape>;
+  return (
+    typeof candidate.track?.kind === "string" &&
+    Array.isArray(candidate.streams)
+  );
+}
+
+function isMessageEvent(value: unknown): value is MessageEventShape {
+  return Boolean(value && typeof value === "object" && "data" in value);
+}
+
+function isOfferDescription(value: unknown): value is OfferDescription {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Partial<OfferDescription>;
+  return candidate.type === "offer" && typeof candidate.sdp === "string";
+}
+
+function waitForIceGathering(peerConnection: RTCPeerConnection, timeoutMs = 4_000): Promise<void> {
+  if (peerConnection.iceGatheringState === "complete") return Promise.resolve();
+
+  return new Promise((resolve) => {
+    const listener = () => {
+      if (peerConnection.iceGatheringState === "complete") {
+        clearTimeout(timeout);
+        peerConnection.onicegatheringstatechange = null;
+        resolve();
+      }
+    };
+    const timeout = setTimeout(() => {
+      peerConnection.onicegatheringstatechange = null;
+      resolve();
+    }, timeoutMs);
+    peerConnection.onicegatheringstatechange = listener;
+  });
+}
+
+export class RealtimeVoiceClient {
+  private readonly audioSession = new RealtimeAudioSession();
+  private peerConnection: RTCPeerConnection | null = null;
+  private dataChannel: ReturnType<RTCPeerConnection["createDataChannel"]> | null = null;
+  private localStream: MediaStream | null = null;
+  private stopped = false;
+  private userMuted = false;
+  private assistantAudioGate: AssistantAudioGateState = idleAssistantAudioGateState;
+  private microphoneEnabled: boolean | null = null;
+  private lastSpeechStoppedAt: number | null = null;
+
+  public constructor(private readonly callbacks: RealtimeClientCallbacks) {}
+
+  public async start(input: StartRealtimeInput): Promise<void> {
+    if (this.peerConnection) throw new Error("A realtime session is already active.");
+    this.stopped = false;
+    this.userMuted = false;
+    this.assistantAudioGate = idleAssistantAudioGateState;
+    this.microphoneEnabled = null;
+    this.lastSpeechStoppedAt = null;
+    this.callbacks.onConnectionState("connecting");
+    const correlation = createCorrelation();
+    const startedAt = performance.now();
+
+    diagnosticLog.record("info", "realtime.connection.started", {
+      requestId: correlation.requestId,
+      traceId: correlation.traceId,
+      scenarioId: input.scenarioId,
+      personaId: input.personaId,
+    });
+
+    try {
+      await this.audioSession.start();
+      const peerConnection = new RTCPeerConnection({ iceServers: [] });
+      this.peerConnection = peerConnection;
+
+      peerConnection.onconnectionstatechange = () => {
+        const state = peerConnection.connectionState;
+        diagnosticLog.record(state === "failed" ? "error" : "debug", "realtime.peer.state", {
+          state,
+        });
+        if (state === "connected") this.callbacks.onConnectionState("connected");
+        else if (state === "disconnected") this.callbacks.onConnectionState("disconnected");
+        else if (state === "failed") this.callbacks.onConnectionState("failed");
+        else if (state === "closed") this.callbacks.onConnectionState("closed");
+      };
+
+      peerConnection.ontrack = (rawEvent: unknown) => {
+        if (!isTrackEvent(rawEvent)) return;
+        diagnosticLog.record("debug", "realtime.remote.track.received", {
+          kind: rawEvent.track.kind,
+          streamCount: rawEvent.streams.length,
+        });
+      };
+
+      const localStream = await mediaDevices.getUserMedia({
+        audio: true,
+        video: false,
+      });
+      this.localStream = localStream;
+      this.syncMicrophone("capture_started");
+      localStream.getTracks().forEach((track) => peerConnection.addTrack(track, localStream));
+
+      const dataChannel = peerConnection.createDataChannel("oai-events");
+      this.dataChannel = dataChannel;
+      dataChannel.onopen = () => {
+        diagnosticLog.record("info", "realtime.data_channel.opened");
+      };
+      dataChannel.onclose = () => {
+        diagnosticLog.record("info", "realtime.data_channel.closed");
+      };
+      dataChannel.onmessage = (rawMessage: unknown) => {
+        if (!isMessageEvent(rawMessage) || typeof rawMessage.data !== "string") return;
+        const event = parseRealtimeEvent(rawMessage.data);
+        if (!event) {
+          diagnosticLog.record("warn", "realtime.event.invalid");
+          return;
+        }
+        this.handleTurnControlEvent(event);
+        diagnosticLog.record("debug", "realtime.event.received", { type: event.type });
+        this.callbacks.onEvent(event);
+      };
+
+      const offer: unknown = await peerConnection.createOffer({
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: false,
+      });
+      if (!isOfferDescription(offer)) throw new Error("The device created an invalid SDP offer.");
+      await peerConnection.setLocalDescription(offer);
+      await waitForIceGathering(peerConnection);
+      const sdp = peerConnection.localDescription?.sdp;
+      if (!sdp) throw new Error("The device did not create an SDP offer.");
+
+      const response = await fetchWithTimeout(
+        `${getApiBaseUrl()}/api/v1/realtime/calls?scenarioId=${encodeURIComponent(input.scenarioId)}&personaId=${encodeURIComponent(input.personaId)}`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/sdp",
+            "x-anonymous-user-id": input.anonymousUserId,
+            "x-request-id": correlation.requestId,
+            traceparent: correlation.traceparent,
+          },
+          body: sdp,
+        },
+        12_000,
+      );
+
+      const answerSdp = await response.text();
+      if (!response.ok) throw new Error(`Realtime session request failed (${response.status}).`);
+      if (this.stopped) return;
+
+      await peerConnection.setRemoteDescription(
+        new RTCSessionDescription({ type: "answer", sdp: answerSdp }),
+      );
+      diagnosticLog.record("info", "realtime.connection.negotiated", {
+        requestId: response.headers.get("x-request-id") ?? correlation.requestId,
+        traceId: response.headers.get("x-trace-id") ?? correlation.traceId,
+        model: response.headers.get("x-ai-model") ?? "unknown",
+        durationMs: Math.round(performance.now() - startedAt),
+      });
+    } catch (error) {
+      const normalized = error instanceof Error ? error : new Error("Realtime connection failed.");
+      diagnosticLog.record("error", "realtime.connection.failed", {
+        errorType: normalized.name,
+        durationMs: Math.round(performance.now() - startedAt),
+      });
+      this.callbacks.onError(normalized);
+      this.stop();
+      throw normalized;
+    }
+  }
+
+  public setMuted(muted: boolean): void {
+    this.userMuted = muted;
+    this.syncMicrophone("user_control");
+    diagnosticLog.record("info", "realtime.microphone.changed", { muted });
+  }
+
+  private handleTurnControlEvent(event: RealtimeEvent): void {
+    if (event.type === "input_audio_buffer.speech_stopped") {
+      this.lastSpeechStoppedAt = performance.now();
+    }
+
+    if (event.type === "output_audio_buffer.started" && this.lastSpeechStoppedAt !== null) {
+      diagnosticLog.record("info", "realtime.turn.audio_started", {
+        turnLatencyMs: Math.round(performance.now() - this.lastSpeechStoppedAt),
+      });
+      this.lastSpeechStoppedAt = null;
+    }
+
+    const previous = this.assistantAudioGate;
+    const next = nextAssistantAudioGateState(previous, event);
+    if (next !== previous) {
+      this.assistantAudioGate = next;
+      this.syncMicrophone(`assistant_event:${event.type}`);
+    }
+
+    if (event.type === "response.done" || event.type === "error" || event.type.endsWith(".failed")) {
+      this.lastSpeechStoppedAt = null;
+    }
+
+    const completion = responseCompletionFromRealtimeEvent(event);
+    if (completion) {
+      diagnosticLog.record(
+        completion.status === "completed" ? "info" : "warn",
+        "realtime.response.completed",
+        {
+          status: completion.status,
+          reason: completion.reason,
+          totalUnits: completion.totalUnits,
+          outputUnits: completion.outputUnits,
+          speechUnits: completion.audioUnits,
+          textUnits: completion.textUnits,
+        },
+      );
+    }
+  }
+
+  private syncMicrophone(reason: string): void {
+    const assistantTurnActive =
+      this.assistantAudioGate.responseActive || this.assistantAudioGate.audioPlaying;
+    const enabled = !this.stopped && !this.userMuted && !assistantTurnActive;
+    const tracks = this.localStream?.getAudioTracks() ?? [];
+    let changed = false;
+
+    tracks.forEach((track) => {
+      if (track.enabled === enabled) return;
+      track.enabled = enabled;
+      changed = true;
+    });
+
+    if (!changed && this.microphoneEnabled === enabled) return;
+    this.microphoneEnabled = enabled;
+    diagnosticLog.record("info", "realtime.microphone.gate_changed", {
+      enabled,
+      userMuted: this.userMuted,
+      assistantTurnActive,
+      reason,
+    });
+  }
+
+  public stop(): void {
+    if (this.stopped) return;
+    this.stopped = true;
+    diagnosticLog.record("info", "realtime.connection.stopping");
+    this.syncMicrophone("connection_stopping");
+    this.dataChannel?.close();
+    this.dataChannel = null;
+    this.localStream?.getTracks().forEach((track) => track.stop());
+    this.localStream?.release();
+    this.localStream = null;
+    this.peerConnection?.close();
+    this.peerConnection = null;
+    this.audioSession.stop();
+    diagnosticLog.record("info", "realtime.connection.stopped");
+    this.callbacks.onConnectionState("closed");
+  }
+}
