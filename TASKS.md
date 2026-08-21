@@ -28,9 +28,13 @@
 
 ## External release inputs still required
 
-- [ ] Final application name and production Android package ID.
-- [ ] Google Play developer-account age, verification, and production-access status.
-- [ ] RevenueCat project/app, Google Play products, pricing, trial decision, and public SDK key.
+- [x] Lock final application name `Say It First` and production Android package `app.sayitfirst`.
+- [x] Record the Google Play personal-account verification and production-access status; identity
+      review is the current external gate.
+- [x] Create the RevenueCat project/app, configure separate Test Store and production public SDK
+      keys, and lock offering/entitlement identifiers.
+- [ ] Create Google Play products and base plans, then finalise real pricing and trial/judge access
+      after Play enables app creation.
 - [ ] Privacy-policy and support URLs for the store listing.
 
 ## Phase 1 next — after Checkpoint 1 is accepted
@@ -38,9 +42,11 @@
 - [ ] Implement the complete three-scenario/two-persona practice catalogue.
 - [ ] Implement preparedness ratings, local history/delete, highlighted-moment retry, comparison,
       and privacy-safe local reminder.
-- [ ] Integrate `react-native-purchases` and `react-native-purchases-ui` in a billing service.
-- [ ] Implement monthly/annual offerings, `pro` entitlement, contextual paywall, restore, manage,
-      cancellation/expiry handling, and judge trial or promo access.
+- [x] Integrate `react-native-purchases` and `react-native-purchases-ui` in a billing service.
+- [x] Implement dynamic monthly/annual packages, the case-sensitive `Pro` entitlement, contextual
+      paywall, purchase, restore, Customer Center, and privacy-safe billing diagnostics.
+- [ ] Production-test cancellation, renewal, expiry/revocation, offline/reinstall behaviour, and a
+      genuine judge trial or promo path through a Play-distributed build.
 - [ ] Enforce paid usage on the server with RevenueCat-backed entitlement snapshots and idempotent
       webhooks.
 - [ ] Add privacy-safe funnel analytics, crash reporting, AI cost/error monitoring, and support.

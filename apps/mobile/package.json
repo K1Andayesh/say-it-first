@@ -11,11 +11,12 @@
     "prebuild:android": "expo prebuild --platform android --clean",
     "prestart": "pnpm --filter @say-it-first/contracts build && pnpm --filter @say-it-first/domain build",
     "start": "expo start --dev-client",
-    "test": "vitest run src/services/realtime",
+    "test": "vitest run src/services/realtime src/services/billing",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@config-plugins/react-native-webrtc": "^15.0.2",
+    "@expo/config-plugins": "~57.0.8",
     "@say-it-first/contracts": "workspace:*",
     "@say-it-first/domain": "workspace:*",
     "expo": "~57.0.14",
@@ -32,6 +33,8 @@
     "react-dom": "19.2.3",
     "react-native": "0.86.2",
     "react-native-incall-manager": "4.2.2",
+    "react-native-purchases": "^10.7.2",
+    "react-native-purchases-ui": "^10.7.2",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-web": "~0.21.0",
     "react-native-webrtc": "^124.0.8",

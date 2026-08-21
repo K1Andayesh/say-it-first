@@ -19,21 +19,24 @@ written consent.
 - First public release: pending
 - Google Play URL: pending
 - United States availability: pending
-- RevenueCat production purchase: pending
+- RevenueCat Test Store purchase: complete on Android; not a qualifying production purchase
+- RevenueCat production purchase: pending Google Play configuration and Play-distributed test
 - Judge access: pending
-- English text description: pending
+- English text description: draft complete; final production claims and links pending
 - Public demo video shorter than two minutes: pending
 - 1024 x 1024 icon: pending
 - 1179 x 2556 frameless screenshot: pending
-- Category-specific submission copy: pending
+- Category-specific submission copy: draft complete; final production evidence pending
 
 ## Play production access
 
-- Account type: human input required
-- Account creation date: human input required
-- Verification status: human input required
-- Existing production access: human input required
-- Closed-test requirement applies: unknown
+- Account type: personal developer account
+- Account creation date: not yet recorded
+- Verification status: Google identity-document review in progress
+- Contact phone: verification disabled until identity approval
+- Create app: disabled until identity approval
+- Existing production access: none confirmed
+- Closed-test requirement applies: to be confirmed after account verification
 
 ## Technical evidence
 
@@ -57,9 +60,20 @@ written consent.
   and restored the audio session on teardown
 - Grounded evaluation: 12-turn transcript accepted, exact-quote validation completed, evaluator
   confidence 0.98, and the mobile reached the completed state
-- Standard provider secret absent from mobile bundle: architecture enforced; build audit pending
-- Automated verification: API lint/typecheck/test/build and mobile lint/typecheck/test passed after
-  the audio-completion repair; the final full gate for per-turn quality telemetry is pending
+- RevenueCat native SDK and UI modules compiled into the Android debug build; the manifest includes
+  Google Play Billing permission and store-shaped builds use purchase-safe `singleTop` activity mode
+- RevenueCat Test Store offering `default` loaded two live packages; a valid Annual purchase
+  activated the case-sensitive `Pro` entitlement, restore succeeded, and Customer Center opened
+- RevenueCat dashboard recorded the matching sandbox Yearly subscription; sandbox entitlement
+  access is restricted to the current test app user ID
+- Production RevenueCat Play app created for `app.sayitfirst`; Play service credentials and real
+  products remain pending the Google account gate
+- Personal EAS project `@keyvan.andayesh/say-it-first` linked; Test Store keys are isolated to
+  development/preview and the Play public SDK key is configured only in the production environment
+- Standard provider secret absent from mobile bundle: architecture enforced; production AAB audit
+  remains pending
+- Automated verification: native Android build passed; the full repository lint, strict TypeScript,
+  26-test suite, API/package builds, and Android export passed on 21 August 2026
 
 ## Primary category evidence matrix
 

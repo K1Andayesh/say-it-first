@@ -35,7 +35,7 @@ are stable. More integrations do not improve the score unless their award can be
 |---|---|---|
 | New public app | First eligible-store release during the official submission window | Pending |
 | Supported platform | Working Android app published to Google Play or Galaxy Store | Android spike works; store release pending |
-| RevenueCat | Official SDK powers at least one genuine in-app purchase | Pending |
+| RevenueCat | Official SDK powers at least one genuine in-app purchase | SDK and Android Test Store purchase proven; genuine Play purchase pending |
 | United States access | Judge can download and use the app in the US | Pending |
 | Judge premium access | Working free trial or promo code through judging | Pending |
 | Functional fidelity | Store build matches video and written claims | Pending |
@@ -77,7 +77,7 @@ next step so it is useful rather than decorative.
 
 Recommended V1 packaging:
 
-- Free: onboarding, scenario discovery, one complete practice that demonstrates real value, limited
+- Free: onboarding, scenario discovery, two complete practices that demonstrate real value, limited
   history, and transparent privacy controls.
 - Pro monthly: recurring practice, full scenario/persona access, retries, progress history, and
   scheduled-conversation preparation.
@@ -88,6 +88,11 @@ Recommended V1 packaging:
 The paywall belongs after demonstrated value or at a clearly contextual premium action. Prices,
 packages, trial eligibility, purchase, restore, cancellation, expiry, and entitlement refresh must
 come from the real RevenueCat/Google Play configuration.
+
+Current evidence: the official SDK, coded contextual paywall, live Test Store packages, purchase,
+`Pro` entitlement activation, restore, and Customer Center have been exercised in the actual
+Android UI. This is a development proof only. The qualifying Play-distributed purchase remains a
+release gate. See `revenuecat-billing-runbook.md`.
 
 ## Growth proof
 

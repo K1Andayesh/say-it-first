@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { palette, radius, spacing, typography } from "@/design/tokens";
+import { ProPaywall } from "@/features/billing/pro-paywall";
+import { useBilling } from "@/services/billing/billing-provider";
 import { TranscriptPanel } from "./transcript-panel";
 import { useRehearsalController } from "./use-rehearsal-controller";
 import { VoicePresence } from "./voice-presence";
@@ -62,6 +65,9 @@ function TrustRow() {
 
 export function RehearsalSpikeScreen() {
   const controller = useRehearsalController();
+  const billing = useBilling();
+  const [paywallVisible, setPaywallVisible] = useState(false);
+  const [paywallSource, setPaywallSource] = useState<"header" | "post_evaluation">("header");
   const { width } = useWindowDimensions();
   const compact = width < 380;
   const state = controller.sessionState;
@@ -88,10 +94,18 @@ export function RehearsalSpikeScreen() {
             </View>
             <Text style={styles.brand}>SAY IT FIRST</Text>
           </View>
-          <View style={styles.checkpointPill}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={billing.isPro ? "Manage Pro access" : "Explore Pro plans"}
+            onPress={() => {
+              setPaywallSource("header");
+              setPaywallVisible(true);
+            }}
+            style={({ pressed }) => [styles.checkpointPill, pressed && styles.checkpointPillPressed]}
+          >
             <View style={styles.checkpointDot} />
-            <Text style={styles.checkpointText}>PRIVATE LAB</Text>
-          </View>
+            <Text style={styles.checkpointText}>{billing.isPro ? "PRO ACTIVE" : "PRO"}</Text>
+          </Pressable>
         </View>
 
         {isLanding ? (
@@ -250,6 +264,38 @@ export function RehearsalSpikeScreen() {
               </View>
             ) : null}
 
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={billing.isPro ? "Manage Pro access" : "Explore Say It First Pro"}
+              onPress={() => {
+                setPaywallSource("post_evaluation");
+                setPaywallVisible(true);
+              }}
+              style={({ pressed }) => [styles.proCard, pressed && styles.proCardPressed]}
+            >
+              <LinearGradient
+                colors={["rgba(138,114,255,0.18)", "rgba(255,107,95,0.13)"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={StyleSheet.absoluteFill}
+              />
+              <View style={styles.proCardTopline}>
+                <View style={styles.proBadge}>
+                  <View style={styles.proBadgeDot} />
+                  <Text style={styles.proBadgeText}>{billing.isPro ? "PRO IS ACTIVE" : "SAY IT FIRST PRO"}</Text>
+                </View>
+                <Text style={styles.proArrow}>↗</Text>
+              </View>
+              <Text style={styles.proCardTitle}>
+                {billing.isPro ? "Your practice room stays ready." : "Make the next hard conversation easier, too."}
+              </Text>
+              <Text style={styles.proCardBody}>
+                {billing.isPro
+                  ? "Manage your plan, restore access, or review your subscription."
+                  : "Two complete practices stay free. Pro adds the full catalogue, focused retries and progress history."}
+              </Text>
+            </Pressable>
+
             <View style={styles.resultsAction}>
               <PrimaryButton label="Rehearse it again" onPress={controller.reset} />
               <Text style={styles.resultsPrivacy}>Nothing was sent to your workplace.</Text>
@@ -278,6 +324,11 @@ export function RehearsalSpikeScreen() {
           </View>
         ) : null}
       </SafeAreaView>
+      <ProPaywall
+        visible={paywallVisible}
+        source={paywallSource}
+        onClose={() => setPaywallVisible(false)}
+      />
     </LinearGradient>
   );
 }
@@ -333,6 +384,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: palette.line,
   },
+  checkpointPillPressed: { opacity: 0.78, transform: [{ scale: 0.97 }] },
   checkpointDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: palette.cyan },
   checkpointText: { fontSize: 8, fontWeight: "800", letterSpacing: 1.45, color: palette.ivoryMuted },
   landingContent: { paddingHorizontal: spacing.lg, paddingTop: 27, paddingBottom: spacing.xl, gap: 28 },
@@ -506,6 +558,23 @@ const styles = StyleSheet.create({
   },
   nextSentenceLabel: { ...typography.eyebrow, letterSpacing: 1.6, color: palette.coralLight },
   nextSentence: { fontSize: 18, lineHeight: 27, color: palette.ivory, marginTop: 10 },
+  proCard: {
+    overflow: "hidden",
+    marginTop: spacing.md,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: "rgba(138,114,255,0.35)",
+    backgroundColor: palette.inkRaised,
+    padding: 20,
+  },
+  proCardPressed: { opacity: 0.9, transform: [{ scale: 0.988 }] },
+  proCardTopline: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  proBadge: { flexDirection: "row", alignItems: "center", gap: 7 },
+  proBadgeDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: palette.violet },
+  proBadgeText: { ...typography.eyebrow, color: "#B9ACFF", letterSpacing: 1.6 },
+  proArrow: { fontSize: 19, color: palette.ivoryMuted },
+  proCardTitle: { ...typography.title, fontSize: 21, lineHeight: 26, color: palette.ivory, marginTop: 15 },
+  proCardBody: { fontSize: 13, lineHeight: 20, color: palette.ivoryMuted, marginTop: 8 },
   resultsAction: { marginTop: spacing.lg, gap: 12 },
   resultsPrivacy: { textAlign: "center", fontSize: 11, color: palette.ivoryMuted },
   recoveryContent: {

@@ -104,3 +104,40 @@ audio-route evidence without retaining sensitive conversation content.
 ### Public links
 
 - Pending
+
+## 2026-08-21 — Pro must unlock in the app, not just succeed in a dashboard
+
+### Hypothesis
+
+A polished paywall is only credible if a store-backed package activates the exact entitlement the
+runtime checks, survives restore, and can be managed by the customer.
+
+### What we built or tested
+
+Integrated the RevenueCat React Native SDK, a contextual custom paywall, dynamic Monthly and Annual
+packages, truthful calculated savings, explicit restore, Customer Center, release-key safeguards,
+and privacy-safe billing diagnostics. Created the Say It First RevenueCat project and production
+Android app configuration, then exercised the full Test Store flow in the Android UI.
+
+### Evidence
+
+The native build passed. RevenueCat returned two live packages. A valid simulated Annual purchase
+activated `Pro`, the app displayed the unlocked state, restore retained access, Customer Center
+showed the subscription, and the RevenueCat dashboard recorded the matching sandbox transaction.
+During testing, the dashboard-created entitlement identifier was found to be case-sensitive `Pro`;
+the runtime contract and regression test were corrected before acceptance.
+
+### Feedback
+
+The competition requires RevenueCat to power a real in-app purchase. A Test Store success proves
+the integration but does not satisfy that release requirement.
+
+### Decision
+
+Keep Test Store and production credentials separated, reject Test Store keys in production, and do
+not claim Shipaton purchase compliance until a Google Play-distributed build activates the same
+entitlement. Google Play identity review is the current external blocker.
+
+### Public links
+
+- Pending

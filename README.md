@@ -18,11 +18,15 @@ Phase 1 is at the Realtime technical gate. The repository currently includes:
 - Physical-device voice rehearsal with explicit Android audio focus and speaker routing.
 - Live transcript capture.
 - Structured evaluation with exact-quote evidence validation.
+- RevenueCat SDK integration with a polished contextual paywall, dynamic packages, purchase,
+  restore, entitlement refresh, and Customer Center.
 - Correlated, privacy-safe mobile and API diagnostics.
 - Strict shared contracts and domain tests.
 
-The next release gate is one uninterrupted five-minute physical-device rehearsal, followed by the
-three-scenario practice loop, RevenueCat monetisation, and Google Play release work.
+The RevenueCat Test Store flow is verified end to end, including `Pro` activation and the matching
+dashboard transaction. It is development evidence only. The next release gates are one final
+uninterrupted five-minute physical-device rehearsal, the three-scenario practice loop, Google Play
+account approval, and a genuine Play-distributed purchase.
 
 ## Repository layout
 
@@ -72,6 +76,8 @@ pnpm dev:mobile
 - [Active tasks](./TASKS.md)
 - [Shipaton winning scorecard](./docs/shipaton-winning-scorecard.md)
 - [Compliance evidence](./docs/shipaton-compliance.md)
+- [RevenueCat billing runbook](./docs/revenuecat-billing-runbook.md)
+- [Devpost submission draft](./docs/devpost-submission-draft.md)
 - [Architecture](./docs/architecture.md)
 
 ## Privacy stance

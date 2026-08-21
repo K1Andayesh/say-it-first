@@ -534,7 +534,7 @@ Do not build before submission unless all release blockers are complete:
 4. User selects monthly or annual.
 5. Purchase is initiated through the RevenueCat SDK.
 6. CustomerInfo is refreshed.
-7. The `pro` entitlement is checked.
+7. The case-sensitive `Pro` entitlement is checked.
 8. Pro capability unlocks immediately.
 9. Purchase state remains correct after restart and reinstall/restore.
 
@@ -1258,7 +1258,7 @@ Use configuration rather than scattered literals.
 Recommended initial identifiers:
 
 ```text
-Entitlement: pro
+Entitlement: `Pro`
 Offering: default
 
 Google Play products:
@@ -1296,7 +1296,7 @@ Real purchases require an Expo development build or production build. Expo Go pr
 Premium access must derive from RevenueCat CustomerInfo:
 
 ```ts
-const isPro = customerInfo.entitlements.active["pro"] !== undefined;
+const isPro = customerInfo.entitlements.active["Pro"] !== undefined;
 ```
 
 Encapsulate this logic in one billing service. Do not scatter entitlement checks across components.
@@ -1309,7 +1309,7 @@ For each purchase:
 2. Invoke RevenueCat SDK purchase.
 3. Distinguish cancellation from failure.
 4. Refresh CustomerInfo.
-5. Confirm `pro` entitlement.
+5. Confirm the case-sensitive `Pro` entitlement.
 6. Update application state.
 7. Notify backend entitlement cache where required.
 8. Track success or failure without sensitive billing data.
@@ -2513,7 +2513,7 @@ Exit criteria:
 Deliver:
 
 - RevenueCat production SDK integration
-- Monthly and annual packages and `pro` entitlement
+- Monthly and annual packages and the case-sensitive `Pro` entitlement
 - Contextual paywall, restore, manage subscription, and trial/judge access
 - Server-side usage and entitlement enforcement
 - Google Play licence-tester purchase, cancellation, restore, expiry/revocation, network-failure, and offering-unavailable tests
@@ -2619,7 +2619,7 @@ Phase 1 is done only when all of the following are true:
 ### Billing and release
 
 - [ ] Official RevenueCat React Native SDK powers a real Google Play purchase.
-- [ ] Monthly and annual packages, `pro` entitlement, cancellation, restore, expiry/revocation, and manage-subscription path work.
+- [ ] Monthly and annual packages, the case-sensitive `Pro` entitlement, cancellation, restore, expiry/revocation, and manage-subscription path work.
 - [ ] Server-side usage does not trust a client-supplied Pro flag.
 - [ ] Trial or judge access works.
 - [ ] No Test Store key is present in production.
@@ -2665,7 +2665,7 @@ Phase 2 is done only when the following complete-product and competition require
 - [ ] At least one real Google Play purchase is powered by RevenueCat.
 - [ ] Offerings load dynamically.
 - [ ] Monthly and annual packages work.
-- [ ] `pro` entitlement unlocks features.
+- [ ] The case-sensitive `Pro` entitlement unlocks features.
 - [ ] Purchase cancellation does not show an error.
 - [ ] Restore purchases works.
 - [ ] Expiry/revocation updates access.
