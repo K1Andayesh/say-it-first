@@ -106,4 +106,5 @@ test subscription, not a paying customer or real revenue.
 - Remaining purchase lifecycle tests and developer-notification verification.
 - First non-test customer transaction and truthful revenue evidence.
 - Enforcement of the advertised free/Pro feature boundary across every scenario and retry path.
-- Hosted production Terms, Privacy, and support contact matching the in-app text and Play listing.
+- Play listing links and copy confirmed against the deployed production Terms, Privacy, and support
+  pages.

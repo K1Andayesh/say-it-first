@@ -103,7 +103,8 @@ manager.
 
 Before public release we will complete the three-scenario, two-persona Phase 1 practice loop,
 preparedness comparison, highlighted-moment retry, history/deletion, server-side entitlement
-enforcement, final hosted privacy/support verification, and production monitoring.
+enforcement, Play-listing alignment with the hosted privacy/support pages, and production
+monitoring.
 
 The official app and Monthly/Annual offers are now distributed through Play closed testing, and the
 production RevenueCat path has activated `Pro` from a Play license-test subscription. Before public
