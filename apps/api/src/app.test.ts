@@ -113,6 +113,22 @@ describe("API", () => {
     await app.close();
   });
 
+  it("serves production privacy, terms, and support pages without placeholder copy", async () => {
+    const app = await buildApp(testEnvironment, { realtimeProvider, evaluationProvider });
+
+    for (const path of ["/privacy", "/terms", "/support"]) {
+      const response = await app.inject({ method: "GET", url: path });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.headers["content-type"]).toContain("text/html");
+      expect(response.headers["content-security-policy"]).toContain("default-src 'none'");
+      expect(response.body).toContain("keyvan.andayesh@gmail.com");
+      expect(response.body).not.toContain("will include the support contact");
+    }
+
+    await app.close();
+  });
+
   it("proxies an SDP offer and returns correlation metadata", async () => {
     const app = await buildApp(testEnvironment, { realtimeProvider, evaluationProvider });
 

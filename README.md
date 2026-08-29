@@ -14,6 +14,7 @@ Influencer Award — Career Coaching.
 Phase 1 is at the Realtime technical gate. The repository currently includes:
 
 - A native Expo/React Native Android development build.
+- An official Google Play closed-test build installed and exercised on a Samsung Galaxy S10.
 - Server-controlled OpenAI Realtime WebRTC negotiation.
 - Physical-device voice rehearsal with explicit Android audio focus and speaker routing.
 - Live transcript capture.
@@ -23,10 +24,12 @@ Phase 1 is at the Realtime technical gate. The repository currently includes:
 - Correlated, privacy-safe mobile and API diagnostics.
 - Strict shared contracts and domain tests.
 
-The RevenueCat Test Store flow is verified end to end, including `Pro` activation and the matching
-dashboard transaction. It is development evidence only. The next release gates are one final
-uninterrupted five-minute physical-device rehearsal, the three-scenario practice loop, Google Play
-account approval, and a genuine Play-distributed purchase.
+RevenueCat is verified through both its Test Store and the official Play-distributed build. A
+Google Play license-test Annual subscription opened the native billing sheet, completed without a
+charge, and activated the case-sensitive `Pro` entitlement in the app. This proves the production
+SDK/store path, but it is not real revenue. The next release gates are the stable-session voice
+criterion, the three-scenario practice loop, the required Play closed-test/production-access path,
+and the first public customer transaction.
 
 ## Repository layout
 

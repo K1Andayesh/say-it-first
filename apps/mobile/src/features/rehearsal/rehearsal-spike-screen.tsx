@@ -68,8 +68,9 @@ export function RehearsalSpikeScreen() {
   const billing = useBilling();
   const [paywallVisible, setPaywallVisible] = useState(false);
   const [paywallSource, setPaywallSource] = useState<"header" | "post_evaluation">("header");
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const compact = width < 380;
+  const compactLive = height < 720;
   const state = controller.sessionState;
   const isLanding = state === "idle" || state === "blocked" || state === "connection_failed";
   const isResults = state === "completed";
@@ -173,7 +174,7 @@ export function RehearsalSpikeScreen() {
         ) : null}
 
         {isLive || isConnecting || isEvaluating ? (
-          <View style={styles.liveContent}>
+          <View style={[styles.liveContent, compactLive && styles.liveContentCompact]}>
             <View style={styles.sessionHeader}>
               <View style={styles.sessionHeaderText}>
                 <Text style={styles.eyebrow}>UNDERPERFORMANCE FEEDBACK</Text>
@@ -186,9 +187,10 @@ export function RehearsalSpikeScreen() {
 
             <VoicePresence
               state={isConnecting || isEvaluating ? "thinking" : controller.voicePresence}
+              compact={compactLive}
             />
 
-            <TranscriptPanel transcript={controller.transcript} />
+            <TranscriptPanel transcript={controller.transcript} compact={compactLive} />
 
             {controller.error ? (
               <View style={styles.inlineError} accessibilityRole="alert">
@@ -257,11 +259,27 @@ export function RehearsalSpikeScreen() {
               </View>
             ) : null}
 
-            {controller.evaluation.suggestedNextSentence ? (
+            {controller.evaluation.suggestedNextSentence && billing.isPro ? (
               <View style={styles.nextSentenceCard}>
                 <Text style={styles.nextSentenceLabel}>TRY THIS NEXT</Text>
                 <Text style={styles.nextSentence}>“{controller.evaluation.suggestedNextSentence}”</Text>
               </View>
+            ) : controller.evaluation.suggestedNextSentence ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Unlock the coached next sentence with Pro"
+                onPress={() => {
+                  setPaywallSource("post_evaluation");
+                  setPaywallVisible(true);
+                }}
+                style={({ pressed }) => [styles.nextSentenceLocked, pressed && styles.proCardPressed]}
+              >
+                <Text style={styles.nextSentenceLabel}>YOUR NEXT SENTENCE IS READY</Text>
+                <Text style={styles.nextSentenceLockedTitle}>Unlock the words to try next.</Text>
+                <Text style={styles.nextSentenceLockedBody}>
+                  Pro reveals the exact coached sentence and lets you rehearse it immediately.
+                </Text>
+              </Pressable>
             ) : null}
 
             <Pressable
@@ -292,12 +310,22 @@ export function RehearsalSpikeScreen() {
               <Text style={styles.proCardBody}>
                 {billing.isPro
                   ? "Manage your plan, restore access, or review your subscription."
-                  : "Two complete practices stay free. Pro adds the full catalogue, focused retries and progress history."}
+                  : "The core rehearsal stays free. Pro unlocks the exact next sentence and a focused retry while the moment is fresh."}
               </Text>
             </Pressable>
 
             <View style={styles.resultsAction}>
-              <PrimaryButton label="Rehearse it again" onPress={controller.reset} />
+              <PrimaryButton
+                label={billing.isPro ? "Rehearse it again" : "Unlock focused retry"}
+                onPress={() => {
+                  if (billing.isPro) {
+                    controller.reset();
+                    return;
+                  }
+                  setPaywallSource("post_evaluation");
+                  setPaywallVisible(true);
+                }}
+              />
               <Text style={styles.resultsPrivacy}>Nothing was sent to your workplace.</Text>
             </View>
           </ScrollView>
@@ -477,6 +505,7 @@ const styles = StyleSheet.create({
   trustCopy: { fontSize: 10, color: palette.ivoryMuted },
   trustDivider: { width: 1, height: 12, backgroundColor: palette.lineStrong },
   liveContent: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.md },
+  liveContentCompact: { paddingTop: spacing.sm, paddingBottom: spacing.sm },
   sessionHeader: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" },
   sessionHeaderText: { flex: 1, paddingRight: spacing.md },
   sessionTitle: { ...typography.title, color: palette.ivory, marginTop: 8 },
@@ -556,8 +585,24 @@ const styles = StyleSheet.create({
     borderColor: palette.line,
     padding: 20,
   },
+  nextSentenceLocked: {
+    marginTop: spacing.md,
+    borderRadius: radius.lg,
+    backgroundColor: "rgba(138,114,255,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(138,114,255,0.34)",
+    padding: 20,
+  },
   nextSentenceLabel: { ...typography.eyebrow, letterSpacing: 1.6, color: palette.coralLight },
   nextSentence: { fontSize: 18, lineHeight: 27, color: palette.ivory, marginTop: 10 },
+  nextSentenceLockedTitle: {
+    ...typography.title,
+    fontSize: 20,
+    lineHeight: 25,
+    color: palette.ivory,
+    marginTop: 10,
+  },
+  nextSentenceLockedBody: { fontSize: 13, lineHeight: 20, color: palette.ivoryMuted, marginTop: 7 },
   proCard: {
     overflow: "hidden",
     marginTop: spacing.md,

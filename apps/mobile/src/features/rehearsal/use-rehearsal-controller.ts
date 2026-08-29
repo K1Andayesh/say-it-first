@@ -62,10 +62,6 @@ export type RehearsalController = {
   reset: () => void;
 };
 
-function isRealtimeEventError(event: RealtimeEvent): boolean {
-  return event.type === "error" || event.type.endsWith(".failed");
-}
-
 function presenceFromEvent(event: RealtimeEvent): VoicePresence | null {
   if (event.type === "input_audio_buffer.speech_started") return "listening";
   if (event.type === "input_audio_buffer.speech_stopped") return "thinking";
@@ -128,14 +124,6 @@ export function useRehearsalController(): RehearsalController {
 
   const handleRealtimeEvent = useCallback(
     (event: RealtimeEvent) => {
-      if (isRealtimeEventError(event)) {
-        setError({
-          title: "The voice session hit a problem",
-          message: "End this attempt safely, then start a fresh rehearsal.",
-          retryable: true,
-        });
-      }
-
       const nextPresence = presenceFromEvent(event);
       if (nextPresence) setVoicePresence(nextPresence);
 
@@ -173,6 +161,13 @@ export function useRehearsalController(): RehearsalController {
   const handleConnectionState = useCallback(
     (next: RealtimeConnectionState) => {
       setConnectionState(next);
+      if (next === "failed") {
+        setError({
+          title: "The voice connection was lost",
+          message: "End this attempt safely, then start a fresh rehearsal.",
+          retryable: true,
+        });
+      }
       if (next === "connected" && sessionStateRef.current === "connecting") {
         moveTo("ready");
         setVoicePresence("listening");

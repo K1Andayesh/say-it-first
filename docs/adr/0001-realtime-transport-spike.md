@@ -1,6 +1,6 @@
 # ADR 0001 — Realtime transport
 
-- Status: proposed; physical-device evidence pending
+- Status: proposed; stable-session gate open
 - Date: 2026-08-20
 
 ## Context
@@ -69,6 +69,16 @@ connections and keeps the standard API key on the backend.
 - The controlled baseline and long replies were classified `good`. The baseline received 525
   packets and the long reply received 1,805; both reported zero packet loss, 1 ms jitter, and zero
   concealed samples or concealment events.
+- A 29 August Samsung Galaxy S10 regression externally recorded an approximately 53-second reply
+  that crossed the previously failing 26-second point and reached its exact requested completion
+  phrase. Grounded evaluation and native WebRTC/audio teardown then completed.
+- The Samsung's original 540-density display setting exposed live controls below the viewport after
+  transcript growth. A height-adaptive voice/transcript layout now keeps both controls visible and
+  was verified in a separately signed lab build on that device.
+- Auxiliary Realtime operation failures are now logged with privacy-safe event/code metadata but do
+  not masquerade as fatal connection errors or reopen the microphone during assistant playback.
+  Realtime server `error` events can describe a rejected client operation; only the WebRTC
+  connection entering `failed` now shows the user the fatal-session recovery path.
 
 The five-minute duration target and a controlled long-reply retest have now been demonstrated, but
 the five-minute run's isolated audible corruption keeps the stable-session criterion open.

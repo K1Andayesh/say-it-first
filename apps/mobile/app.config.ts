@@ -31,9 +31,15 @@ const config: ExpoConfig = {
       monochromeImage: "./assets/images/android-icon-monochrome.png",
     },
     permissions: ["android.permission.RECORD_AUDIO", "com.android.vending.BILLING"],
+    blockedPermissions: [
+      "android.permission.CAMERA",
+      "android.permission.SYSTEM_ALERT_WINDOW",
+      "android.permission.READ_EXTERNAL_STORAGE",
+      "android.permission.WRITE_EXTERNAL_STORAGE",
+    ],
   },
   plugins: [
-    "expo-dev-client",
+    ...(productionBuild ? [] : ["expo-dev-client"]),
     ["expo-secure-store", { configureAndroidBackup: false }],
     "@config-plugins/react-native-webrtc",
     "./plugins/with-android-single-top",

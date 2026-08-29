@@ -1,0 +1,9 @@
+.gcloudignore
+.git
+.gitignore
+#!include:.gitignore
+
+.artifacts/
+_archive/
+docs/
+apps/mobile/

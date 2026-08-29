@@ -34,8 +34,8 @@ are stable. More integrations do not improve the score unless their award can be
 | Gate | Required outcome | Current state |
 |---|---|---|
 | New public app | First eligible-store release during the official submission window | Pending |
-| Supported platform | Working Android app published to Google Play or Galaxy Store | Android spike works; store release pending |
-| RevenueCat | Official SDK powers at least one genuine in-app purchase | SDK and Android Test Store purchase proven; genuine Play purchase pending |
+| Supported platform | Working Android app published to Google Play or Galaxy Store | Official Play closed-test build works on Samsung; public release pending |
+| RevenueCat | Official SDK powers at least one genuine in-app purchase | Play-distributed license-test subscription activates `Pro`; first non-test customer transaction pending |
 | United States access | Judge can download and use the app in the US | Pending |
 | Judge premium access | Working free trial or promo code through judging | Pending |
 | Functional fidelity | Store build matches video and written claims | Pending |
@@ -89,10 +89,11 @@ The paywall belongs after demonstrated value or at a clearly contextual premium 
 packages, trial eligibility, purchase, restore, cancellation, expiry, and entitlement refresh must
 come from the real RevenueCat/Google Play configuration.
 
-Current evidence: the official SDK, coded contextual paywall, live Test Store packages, purchase,
-`Pro` entitlement activation, restore, and Customer Center have been exercised in the actual
-Android UI. This is a development proof only. The qualifying Play-distributed purchase remains a
-release gate. See `revenuecat-billing-runbook.md`.
+Current evidence: the official SDK, coded contextual paywall, store-provided Monthly and Annual
+packages, purchase, `Pro` entitlement activation, restore, and Customer Center have been exercised
+in the actual Android UI. The official Play build also completed a no-charge license-test Annual
+subscription through Google Play Billing and unlocked `Pro`. That proves the production billing
+integration, but it is not customer revenue. See `revenuecat-billing-runbook.md`.
 
 ## Growth proof
 
@@ -129,7 +130,7 @@ results.
 
 - Do not claim the voice gate passed until one uninterrupted five-minute physical-device rehearsal
   finishes audibly and lifecycle/teardown checks pass.
-- Do not claim RevenueCat compliance until a real Google Play purchase activates the entitlement.
+- Do not present a license-test subscription as real revenue or a paying customer.
 - Do not claim a category integration from a mock, local-only substitute, test-store-only final
   build, or dashboard screenshot without the required live behaviour.
 - Do not add a sponsor SDK solely to increase category count.

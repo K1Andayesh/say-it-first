@@ -6,6 +6,7 @@
   "scripts": {
     "android": "expo run:android",
     "build": "expo export --platform android",
+    "eas-build-post-install": "cd ../.. && pnpm --filter @say-it-first/contracts build && pnpm --filter @say-it-first/domain build",
     "preandroid": "pnpm --filter @say-it-first/contracts build && pnpm --filter @say-it-first/domain build",
     "lint": "eslint App.tsx src app.config.ts --max-warnings=0",
     "prebuild:android": "expo prebuild --platform android --clean",

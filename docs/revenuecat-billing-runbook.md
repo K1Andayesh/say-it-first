@@ -1,8 +1,8 @@
 # RevenueCat Billing Runbook
 
-Status: SDK, custom paywall, Test Store purchase, restore, and Customer Center verified on Android
-on 21 August 2026. A genuine Google Play purchase is still required before Shipaton compliance can
-be claimed.
+Status: SDK, custom paywall, Test Store lifecycle, and the official Google Play billing path are
+verified on Android. On 29 August 2026 a Play-distributed license-test Annual subscription activated
+`Pro` on a Samsung Galaxy S10. It incurred no charge and must not be reported as real revenue.
 
 ## Locked identifiers
 
@@ -23,8 +23,8 @@ identifiers.
 | Planned Play annual product | `sayitfirst_pro_annual` |
 
 The entitlement was created by RevenueCat onboarding with the immutable identifier `Pro`. The app
-must use that exact casing. The Play product identifiers remain planned until Play Console enables
-app and product creation.
+must use that exact casing. The Play products are attached to the live `default` offering; retain
+the locked identifiers above for future configuration and audits.
 
 ## Implemented runtime path
 
@@ -56,6 +56,25 @@ app and product creation.
 This evidence proves the integration and product flow, not competition purchase eligibility. Test
 Store transactions generate no real revenue and must never be presented as genuine purchases.
 
+## Verified Google Play evidence
+
+- The Samsung test account opted into the official closed test and installed `app.sayitfirst` from
+  Google Play rather than through ADB.
+- RevenueCat returned store-backed Monthly ($9.99/month) and Annual ($79.99/year) packages in the
+  production app UI during the test.
+- Restore completed through the production SDK path and correctly reported no active entitlement
+  before purchase.
+- Continue With Annual opened the native Google Play Billing sheet for Say It First Pro Annual.
+- The sheet explicitly identified a license-test subscription and confirmed that no charge would
+  occur; the configured test card approved it.
+- Returning to the app displayed `Pro is active. Your practice room is unlocked.` and the header
+  changed to `PRO ACTIVE`.
+- The entitlement remained active after relaunch and after the device antivirus was re-enabled.
+
+This is stronger than a Test Store simulation because the shipped package, Play Billing, the
+RevenueCat production app, and the runtime entitlement contract all participated. It is still a
+test subscription, not a paying customer or real revenue.
+
 ## Key handling
 
 - EAS project: `@keyvan.andayesh/say-it-first`, linked from `apps/mobile/app.config.ts`.
@@ -66,37 +85,25 @@ Store transactions generate no real revenue and must never be presented as genui
   `EXPO_PUBLIC_*`, the mobile bundle, Git, screenshots, or logs.
 - Production code rejects a `test_` key to prevent an invalid store submission.
 
-## Google Play completion sequence
+## Remaining Google Play completion sequence
 
-The Play Console personal developer account is currently waiting for Google identity verification;
-Create app and contact-phone verification remain disabled until that review completes.
-
-When Google enables the account:
-
-1. Complete contact-phone verification.
-2. Create the first Play app with package `app.sayitfirst` and the correct default language and app
-   classification.
-3. Create the monthly and annual subscription products with the locked identifiers above. Configure
-   active base plans, accurate localized benefits, prices, tax settings, and renewal terms.
-4. Create a Play service account with the minimum required permissions, then upload its JSON
-   credentials directly to the RevenueCat Play app. Never add that file to this repository.
-5. Configure Google developer notifications so RevenueCat receives renewal, cancellation, billing
+1. Complete the required closed-test tester count/duration and obtain production access.
+2. Confirm the monthly and annual product metadata, localized benefits, prices, tax settings, and
+   renewal terms in every launch territory.
+3. Audit the Play service account for minimum required permissions. Never add its JSON credentials
+   to this repository.
+4. Confirm Google developer notifications deliver renewal, cancellation, billing
    issue, and expiry events promptly.
-6. Import or attach both Play products to the existing `Pro` entitlement and the matching Monthly
-   and Annual packages in the `default` offering.
-7. Create a production EAS build using the configured production public SDK key. Confirm the
+5. Create each production EAS build using the configured production public SDK key. Confirm the
    bundle contains neither a Test Store key nor a server secret.
-8. Upload to Play internal or closed testing, add the test account as a license tester, and install
-   the build from Google Play rather than by ADB.
-9. Exercise purchase success, cancellation, restore, renewal, expiry, offline launch, reinstall,
+6. Exercise cancellation, restore, renewal, expiry, offline launch, reinstall,
    and banking-app return. Verify both the app entitlement and RevenueCat/Play records.
-10. Only after a Play-distributed transaction activates `Pro` may the Shipaton RevenueCat gate be
-    marked complete.
+7. Record the first non-test customer transaction separately from all license-test evidence.
 
 ## Release blockers
 
-- Google developer identity approval.
-- Play app, subscription products, service credentials, and developer notifications.
-- Production EAS build and Play-distributed purchase validation.
+- Required Play closed-test tester count/duration and production-access approval.
+- Remaining purchase lifecycle tests and developer-notification verification.
+- First non-test customer transaction and truthful revenue evidence.
 - Enforcement of the advertised free/Pro feature boundary across every scenario and retry path.
 - Hosted production Terms, Privacy, and support contact matching the in-app text and Play listing.

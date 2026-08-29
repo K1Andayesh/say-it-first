@@ -68,6 +68,16 @@ function isOfferDescription(value: unknown): value is OfferDescription {
   return candidate.type === "offer" && typeof candidate.sdp === "string";
 }
 
+function publicRealtimeErrorCode(event: RealtimeEvent): string {
+  const directCode = event.code;
+  if (typeof directCode === "string" && directCode.trim()) return directCode;
+
+  const error = event.error;
+  if (!error || typeof error !== "object" || Array.isArray(error)) return "unknown";
+  const nestedCode = (error as Record<string, unknown>).code;
+  return typeof nestedCode === "string" && nestedCode.trim() ? nestedCode : "unknown";
+}
+
 function waitForIceGathering(peerConnection: RTCPeerConnection, timeoutMs = 4_000): Promise<void> {
   if (peerConnection.iceGatheringState === "complete") return Promise.resolve();
 
@@ -171,6 +181,13 @@ export class RealtimeVoiceClient {
         }
         this.handleTurnControlEvent(event);
         diagnosticLog.record("debug", "realtime.event.received", { type: event.type });
+        if (event.type === "error" || event.type.endsWith(".failed")) {
+          diagnosticLog.record(
+            event.type === "error" ? "error" : "warn",
+            "realtime.operation.failed",
+            { eventType: event.type, errorCode: publicRealtimeErrorCode(event) },
+          );
+        }
         this.callbacks.onEvent(event);
       };
 

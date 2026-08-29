@@ -19,8 +19,9 @@ written consent.
 - First public release: pending
 - Google Play URL: pending
 - United States availability: pending
-- RevenueCat Test Store purchase: complete on Android; not a qualifying production purchase
-- RevenueCat production purchase: pending Google Play configuration and Play-distributed test
+- RevenueCat Test Store purchase: complete on Android
+- RevenueCat Play integration: Play-distributed no-charge license-test Annual subscription
+  activated `Pro`; first non-test customer transaction remains pending
 - Judge access: pending
 - English text description: draft complete; final production claims and links pending
 - Public demo video shorter than two minutes: pending
@@ -31,12 +32,13 @@ written consent.
 ## Play production access
 
 - Account type: personal developer account
-- Account creation date: not yet recorded
-- Verification status: Google identity-document review in progress
-- Contact phone: verification disabled until identity approval
-- Create app: disabled until identity approval
+- Account creation date: not recorded in this repository
+- Verification status: complete enough to create and distribute the app
+- App/test status: official closed test active; five addresses are allowlisted and the Samsung test
+  account is opted in
 - Existing production access: none confirmed
-- Closed-test requirement applies: to be confirmed after account verification
+- Closed-test requirement applies: active; required tester count/duration and production-access
+  approval remain release gates
 
 ## Technical evidence
 
@@ -46,6 +48,13 @@ written consent.
 - Controlled audible retest: short, approximately 30-second, and approximately 50-second assistant
   replies all reached their spoken completion markers without cutting out, skipping, distortion,
   silence, or repetition
+- Samsung Galaxy S10 regression: an externally recorded assistant response remained active for
+  approximately 53 seconds, passed the previously failing 26-second point, and reached the exact
+  requested completion phrase. The same Play build produced a grounded debrief and clean WebRTC,
+  microphone, audio-focus, and network teardown.
+- Samsung display-scaling regression: the original 540-density setting exposed live controls below
+  the viewport after transcript growth. The adaptive live layout now keeps Mute and End & reflect
+  fully visible before and after a completed turn at that exact setting.
 - Per-turn WebRTC receiver evidence: the baseline and long controlled replies were classified
   `good`; the baseline received 525 packets and the long reply received 1,805 packets, both with
   zero packet loss, 1 ms reported jitter, and zero concealed samples or concealment events
@@ -66,14 +75,14 @@ written consent.
   activated the case-sensitive `Pro` entitlement, restore succeeded, and Customer Center opened
 - RevenueCat dashboard recorded the matching sandbox Yearly subscription; sandbox entitlement
   access is restricted to the current test app user ID
-- Production RevenueCat Play app created for `app.sayitfirst`; Play service credentials and real
-  products remain pending the Google account gate
+- Production RevenueCat Play app for `app.sayitfirst` returns the live Monthly and Annual packages;
+  a Play license-test Annual subscription activated `Pro` in the official store build
 - Personal EAS project `@keyvan.andayesh/say-it-first` linked; Test Store keys are isolated to
   development/preview and the Play public SDK key is configured only in the production environment
 - Standard provider secret absent from mobile bundle: architecture enforced; production AAB audit
   remains pending
-- Automated verification: native Android build passed; the full repository lint, strict TypeScript,
-  26-test suite, API/package builds, and Android export passed on 21 August 2026
+- Automated verification: full repository lint, strict TypeScript, 30 automated tests, API/shared
+  builds, Android export, and a separately signed Android lab build passed on 29 August 2026
 
 ## Primary category evidence matrix
 

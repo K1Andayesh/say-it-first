@@ -141,3 +141,72 @@ entitlement. Google Play identity review is the current external blocker.
 ### Public links
 
 - Pending
+
+## 2026-08-29 — The store path has to unlock the shipped app
+
+### Hypothesis
+
+A Test Store success is insufficient evidence that the production package, Play Billing, and the
+RevenueCat entitlement contract work together.
+
+### What we built or tested
+
+Installed the official closed-test build from Google Play on a Samsung Galaxy S10, loaded the live
+Monthly and Annual packages, restored purchases, and completed the Annual flow with a Play license
+tester account.
+
+### Evidence
+
+The native Play Billing sheet explicitly identified a no-charge test subscription. After approval,
+the shipped app displayed `Pro is active. Your practice room is unlocked.` and `PRO ACTIVE`. The
+state survived relaunch. This proves the production integration, but it is not real revenue.
+
+### Feedback
+
+Competition compliance and a polished paywall are credible only when the store-distributed package
+unlocks the exact feature boundary the user bought.
+
+### Decision
+
+Keep license-test evidence separate from customer revenue, complete the remaining cancellation,
+renewal, expiry, reinstall, and notification lifecycle checks, and preserve the same case-sensitive
+`Pro` contract across RevenueCat and the app.
+
+### Public links
+
+- Pending
+
+## 2026-08-29 — Reproduce the failure boundary, not just a short happy path
+
+### Hypothesis
+
+The earlier 26-second cutoff is not closed by another short reply; a controlled response must cross
+that point and end on a known phrase while the phone is externally recorded.
+
+### What we built or tested
+
+Ran the Play build on the Samsung, prompted Alex for a continuous long explanation with an exact
+closing phrase, captured the phone output through an external microphone, completed evaluation,
+and inspected native teardown. The same device scaling exposed session controls below the viewport,
+so the live layout was made height-adaptive and rebuilt in a separate signed lab package.
+
+### Evidence
+
+The measured response segment remained active for approximately 53 seconds and reached the exact
+closing phrase. The rebuilt UI kept Mute and End & reflect visible before and after transcript
+growth at the original 540-density setting. WebRTC playout/capture stopped and Android audio focus
+was released on end.
+
+### Feedback
+
+Real-device QA found both the original audio boundary and a high-impact accessibility/usability
+problem that static checks could not expose.
+
+### Decision
+
+Keep explicit completion-marker audio tests, adaptive live-session sizing, privacy-safe failure
+classification, and native teardown evidence in the release gate.
+
+### Public links
+
+- Pending

@@ -41,16 +41,55 @@ describe("assistant audio microphone gate", () => {
     );
   });
 
-  it("fails open after a provider error so the next turn can recover", () => {
+  it("keeps the microphone gated when the server rejects an individual operation", () => {
     const playing = { responseActive: true, audioPlaying: true };
 
-    expect(nextAssistantAudioGateState(playing, event("response.failed"))).toEqual(
-      idleAssistantAudioGateState,
-    );
+    expect(nextAssistantAudioGateState(playing, event("error"))).toEqual(playing);
+  });
+
+  it("keeps the microphone gated when an operation fails before audio starts", () => {
+    const generating = { responseActive: true, audioPlaying: false };
+
+    expect(nextAssistantAudioGateState(generating, event("response.failed"))).toEqual(generating);
+  });
+
+  it("does not reopen the microphone for a non-fatal transcription failure", () => {
+    const playing = { responseActive: true, audioPlaying: true };
+
+    expect(
+      nextAssistantAudioGateState(
+        playing,
+        event("conversation.item.input_audio_transcription.failed"),
+      ),
+    ).toEqual(playing);
   });
 });
 
 describe("Realtime response completion diagnostics", () => {
+  it("captures completed response usage", () => {
+    expect(
+      responseCompletionFromRealtimeEvent({
+        type: "response.done",
+        response: {
+          status: "completed",
+          status_details: null,
+          usage: {
+            total_tokens: 320,
+            output_tokens: 120,
+            output_token_details: { audio_tokens: 100, text_tokens: 20 },
+          },
+        },
+      }),
+    ).toEqual({
+      status: "completed",
+      reason: null,
+      totalUnits: 320,
+      outputUnits: 120,
+      audioUnits: 100,
+      textUnits: 20,
+    });
+  });
+
   it("surfaces a max-output response as incomplete", () => {
     expect(
       responseCompletionFromRealtimeEvent({

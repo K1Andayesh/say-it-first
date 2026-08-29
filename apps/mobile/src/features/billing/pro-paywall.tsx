@@ -29,9 +29,9 @@ type ProPaywallProps = {
 };
 
 const benefits = [
-  "Practise beyond the two included sessions",
-  "Unlock every scenario and employee response style",
-  "Use advanced feedback, focused retries and progress history",
+  "Reveal the exact coached sentence from your debrief",
+  "Retry the difficult moment while it is still fresh",
+  "Restore Pro access through your Google Play account",
 ];
 
 const legalCopy: Record<LegalDocument, readonly string[]> = {
@@ -43,7 +43,7 @@ const legalCopy: Record<LegalDocument, readonly string[]> = {
   ],
   terms: [
     "Say It First is a private rehearsal and coaching aid. It is not legal, medical, employment-relations or professional HR advice, and it does not make decisions about employees.",
-    "The free plan includes two complete practices. Pro features and limits are described on the purchase screen and may evolve without removing an active paid entitlement during its billing period.",
+    "The free experience includes the core rehearsal and debrief. Pro features are described on the purchase screen and may evolve without removing an active paid entitlement during its billing period.",
     "Subscriptions are billed and renewed by Google Play under the price and renewal terms shown before confirmation. You can cancel or manage renewal through Google Play or the in-app subscription centre.",
     "Use the product lawfully and do not submit material you are not authorised to share. AI responses may be imperfect; review important wording before using it in a real conversation.",
   ],
@@ -62,15 +62,15 @@ function LegalView({ document, onBack }: { document: LegalDocument; onBack: () =
       <ScrollView contentContainerStyle={styles.legalContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.eyebrow}>CLEAR BEFORE YOU CONTINUE</Text>
         <Text style={styles.legalTitle}>{title}</Text>
-        <Text style={styles.legalUpdated}>Version 0.1 · 21 August 2026</Text>
+        <Text style={styles.legalUpdated}>Version 0.1 · 24 August 2026</Text>
         {legalCopy[document].map((paragraph) => (
           <Text key={paragraph} style={styles.legalParagraph}>
             {paragraph}
           </Text>
         ))}
         <Text style={styles.legalNote}>
-          The production release will include the support contact and public hosted copy used in
-          the Google Play listing.
+          Hosted policy and support: say-it-first-api-zcuhweereq-ts.a.run.app/privacy ·
+          keyvan.andayesh@gmail.com
         </Text>
       </ScrollView>
     </SafeAreaView>
@@ -145,6 +145,8 @@ export function ProPaywall({ visible, source, onClose }: ProPaywallProps) {
     () => billing.plans.find((plan) => plan.packageIdentifier === selectedPackageIdentifier) ?? null,
     [billing.plans, selectedPackageIdentifier],
   );
+  const visibleResult =
+    billing.isPro && result && !resultIsPositive(result) ? null : result;
 
   useEffect(() => {
     if (!visible) return;
@@ -274,12 +276,15 @@ export function ProPaywall({ visible, source, onClose }: ProPaywallProps) {
                 </View>
               ) : null}
 
-              {result ? (
+              {visibleResult ? (
                 <View
                   accessibilityRole="alert"
-                  style={[styles.resultCard, resultIsPositive(result) && styles.resultCardPositive]}
+                  style={[
+                    styles.resultCard,
+                    resultIsPositive(visibleResult) && styles.resultCardPositive,
+                  ]}
                 >
-                  <Text style={styles.resultText}>{result.message}</Text>
+                  <Text style={styles.resultText}>{visibleResult.message}</Text>
                 </View>
               ) : null}
 
@@ -330,7 +335,10 @@ export function ProPaywall({ visible, source, onClose }: ProPaywallProps) {
                     <Text style={styles.restoreText}>Restore purchases</Text>
                   )}
                 </Pressable>
-                <Text style={styles.freeNote}>Free stays useful: two complete practices and basic evidence-linked feedback.</Text>
+                <Text style={styles.freeNote}>
+                  Free stays useful: the core rehearsal, private debrief, and your strongest
+                  transcript-grounded moment.
+                </Text>
                 <View style={styles.legalLinks}>
                   <Pressable accessibilityRole="link" onPress={() => setLegalDocument("terms")}>
                     <Text style={styles.legalLink}>Terms</Text>

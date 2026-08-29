@@ -19,6 +19,7 @@ import {
 } from "./providers/unavailable-providers.js";
 import { registerEvaluationRoutes } from "./routes/evaluations.js";
 import { registerHealthRoutes } from "./routes/health.js";
+import { registerLegalRoutes } from "./routes/legal.js";
 import { registerRealtimeRoutes } from "./routes/realtime.js";
 import { registerScenarioRoutes } from "./routes/scenarios.js";
 
@@ -63,8 +64,10 @@ export async function buildApp(
     global: true,
     max: 120,
     timeWindow: "1 minute",
-    keyGenerator: (request) =>
-      String(request.headers["x-anonymous-user-id"] ?? request.ip).slice(0, 128),
+    // Never trust a caller-controlled identifier for abuse prevention. The
+    // anonymous user ID is useful for product correlation, but the client IP
+    // is the stable server-observed boundary for protecting paid AI routes.
+    keyGenerator: (request) => request.ip,
   });
 
   if (environment.corsOrigins.length > 0) {
@@ -107,6 +110,7 @@ export async function buildApp(
       : new UnavailableEvaluationProvider(environment.openAI.evaluationModel));
 
   registerHealthRoutes(fastify, { realtimeProvider, evaluationProvider });
+  registerLegalRoutes(fastify);
   registerScenarioRoutes(fastify);
   registerRealtimeRoutes(fastify, { realtimeProvider });
   registerEvaluationRoutes(fastify, { evaluationProvider });

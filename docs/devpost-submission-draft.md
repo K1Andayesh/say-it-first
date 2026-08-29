@@ -14,8 +14,8 @@ Rehearse the difficult workplace conversation before it becomes real.
 ## Short pitch
 
 Say It First gives new managers a private place to practise high-stakes conversations out loud,
-face realistic pushback, receive coaching tied to their exact words, and retry the moment that
-needs work.
+face realistic pushback, receive coaching tied to their exact words, and leave with a clearer next
+sentence.
 
 ## Tell us more about your project
 
@@ -31,18 +31,16 @@ again before another person is affected.
 
 ### What it does
 
-A manager chooses a realistic situation—such as underperformance feedback, saying no, or setting
-an after-hours boundary—and an employee response style. They rate how prepared they feel, then
-speak naturally with an AI-simulated employee that stays in character and pushes back credibly.
+A manager enters a realistic underperformance-feedback rehearsal and speaks naturally with Alex,
+an AI-simulated software engineer who stays in character and pushes back credibly.
 
 The app captures a live transcript and produces structured feedback grounded in the manager's own
-words. Instead of generic advice, it identifies one high-impact moment, explains what was missing,
-and lets the manager retry from that point. The experience closes with a concise original-versus-
-revised comparison and a self-reported preparedness change.
+words. Instead of generic advice, it identifies the manager's strongest moment, explains why it
+worked, and prepares an exact coached sentence to try next.
 
-Say It First Pro is designed for recurring practice, the full scenario and persona catalogue,
-retries, and progress history. The free experience demonstrates real value before presenting a
-contextual RevenueCat-powered monthly or annual offer.
+The free experience includes the core rehearsal, private debrief, and strongest transcript-grounded
+moment. Say It First Pro reveals the exact coached sentence and unlocks an immediate focused retry
+through a contextual RevenueCat-powered monthly or annual offer.
 
 ### How we built it
 
@@ -82,10 +80,13 @@ the exact production contract.
   markers with zero receiver packet loss in the measured runs.
 - The native RevenueCat Test Store path loads live packages, completes an annual sandbox purchase,
   activates `Pro`, restores access, and opens Customer Center in the actual Android UI.
-- The RevenueCat dashboard records the matching sandbox subscription. This is development evidence,
-  not real revenue or the final Shipaton-qualifying Play purchase.
-- The full repository lint, strict TypeScript checks, 26 automated tests, API/package builds, and
-  Android export pass together.
+- The official Play-distributed build completed a no-charge Google Play license-test Annual
+  subscription and activated the same `Pro` entitlement on a Samsung Galaxy S10.
+- A controlled Samsung regression played an approximately 53-second response through the prior
+  26-second failure point and reached its exact completion phrase; the session then produced a
+  grounded debrief and clean audio teardown.
+- Full repository lint, strict TypeScript, 30 automated tests, API/shared builds, Android export,
+  and a separately signed Android lab build pass together.
 
 ### What we learned
 
@@ -102,13 +103,13 @@ manager.
 
 Before public release we will complete the three-scenario, two-persona Phase 1 practice loop,
 preparedness comparison, highlighted-moment retry, history/deletion, server-side entitlement
-enforcement, hosted privacy/support pages, and production monitoring.
+enforcement, final hosted privacy/support verification, and production monitoring.
 
-Google is currently reviewing the personal Play developer account's identity documents. Once app
-creation is enabled, we will configure the monthly and annual Play subscriptions, connect service
-credentials and developer notifications to RevenueCat, distribute the AAB through Play testing,
-and verify purchase, cancellation, restore, renewal, expiry, reinstall, and banking-app return.
-Only a Play-distributed transaction will be presented as the qualifying purchase.
+The official app and Monthly/Annual offers are now distributed through Play closed testing, and the
+production RevenueCat path has activated `Pro` from a Play license-test subscription. Before public
+release we will complete the required tester count/duration and production-access review, then
+verify cancellation, renewal, expiry, reinstall, developer notifications, and banking-app return.
+License-test evidence will never be presented as customer revenue.
 
 After launch, the focus moves to real evidence: practice completion, repeat use, conversion,
 revenue, qualitative manager feedback, and the product changes those signals cause. A useful
@@ -139,7 +140,7 @@ identifying features without written consent. The category name above is submiss
 
 - Public Google Play URL and first-release date inside the eligibility window.
 - United States availability and judge access.
-- Genuine Play-distributed RevenueCat purchase and verified lifecycle tests.
+- First non-test customer transaction plus the remaining RevenueCat lifecycle tests.
 - Public demo video under two minutes.
 - 1024 x 1024 icon and 1179 x 2556 frameless screenshot.
 - Final production metrics, user feedback, and public build-in-public links.

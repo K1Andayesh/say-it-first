@@ -65,10 +65,6 @@ export function nextAssistantAudioGateState(
     return idleAssistantAudioGateState;
   }
 
-  if (event.type === "error" || event.type.endsWith(".failed")) {
-    return idleAssistantAudioGateState;
-  }
-
   return current;
 }
 
