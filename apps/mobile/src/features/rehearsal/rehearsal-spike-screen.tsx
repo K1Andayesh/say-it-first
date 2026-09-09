@@ -143,6 +143,12 @@ export function RehearsalSpikeScreen() {
               <Text style={styles.scenarioLabel}>TODAY’S REHEARSAL</Text>
               <Text style={styles.scenarioTitle}>{controller.scenario.title}</Text>
               <Text style={styles.scenarioDescription}>{controller.scenario.shortDescription}</Text>
+              <View style={styles.rehearsalGoal}>
+                <Text style={styles.rehearsalGoalLabel}>YOUR AIM</Text>
+                <Text style={styles.rehearsalGoalCopy}>
+                  Name the repeated quality gap, hear Alex’s context, then agree one measurable next step and a review date.
+                </Text>
+              </View>
               <View style={styles.roleRow}>
                 <View style={styles.avatar}>
                   <Text style={styles.avatarText}>A</Text>
@@ -181,6 +187,9 @@ export function RehearsalSpikeScreen() {
                 <Text style={styles.sessionTitle}>
                   {isEvaluating ? "Turning the rehearsal into useful feedback" : "Say the real sentence."}
                 </Text>
+                {!isEvaluating ? (
+                  <Text style={styles.sessionPrompt}>Tell Alex what you observed and what needs to change.</Text>
+                ) : null}
               </View>
               <Text style={styles.timer}>{formatTime(controller.elapsedSeconds)}</Text>
             </View>
@@ -438,6 +447,17 @@ const styles = StyleSheet.create({
   scenarioLabel: { ...typography.eyebrow, color: palette.ivoryMuted, marginTop: 27, letterSpacing: 1.65 },
   scenarioTitle: { ...typography.title, color: palette.ivory, marginTop: 6, textTransform: "capitalize" },
   scenarioDescription: { fontSize: 14, lineHeight: 21, color: palette.ivoryMuted, marginTop: 7 },
+  rehearsalGoal: {
+    marginTop: 16,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: "rgba(255,107,95,0.28)",
+    backgroundColor: "rgba(255,107,95,0.08)",
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  rehearsalGoalLabel: { ...typography.eyebrow, color: palette.coralLight, letterSpacing: 1.45 },
+  rehearsalGoalCopy: { fontSize: 13, lineHeight: 19, color: palette.ivory, marginTop: 5 },
   roleRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -509,6 +529,7 @@ const styles = StyleSheet.create({
   sessionHeader: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" },
   sessionHeaderText: { flex: 1, paddingRight: spacing.md },
   sessionTitle: { ...typography.title, color: palette.ivory, marginTop: 8 },
+  sessionPrompt: { fontSize: 12, lineHeight: 17, color: palette.ivoryMuted, marginTop: 5 },
   timer: { fontSize: 13, fontVariant: ["tabular-nums"], letterSpacing: 1, color: palette.ivoryMuted },
   inlineError: {
     marginTop: spacing.sm,
