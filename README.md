@@ -6,15 +6,19 @@ Say It First is an Android-first voice rehearsal app for new managers. A manager
 realistic workplace scenario, practises it with an AI-simulated employee, receives feedback tied to
 their exact words, and retries the moment that needs work.
 
-The project is being built for RevenueCat Shipaton 2026. Its primary competition target is the
+The project was built for RevenueCat Shipaton 2026. Its primary competition target is the
 Influencer Award — Career Coaching.
+
+- [Get Say It First on Google Play](https://play.google.com/store/apps/details?id=app.sayitfirst)
+- [Watch the public demo](https://youtu.be/31-7EvkX-lw)
+- [View the Shipaton submission](https://devpost.com/software/say-it-first)
 
 ## Current state
 
-Phase 1 is at the Realtime technical gate. The repository currently includes:
+Say It First is publicly available on Google Play in Australia, Canada, New Zealand, the United
+Kingdom, and the United States. The released product includes:
 
-- A native Expo/React Native Android development build.
-- An official Google Play closed-test build installed and exercised on a Samsung Galaxy S10.
+- A native Expo/React Native Android app tested on physical Samsung hardware.
 - Server-controlled OpenAI Realtime WebRTC negotiation.
 - Physical-device voice rehearsal with explicit Android audio focus and speaker routing.
 - Live transcript capture.
@@ -27,9 +31,8 @@ Phase 1 is at the Realtime technical gate. The repository currently includes:
 RevenueCat is verified through both its Test Store and the official Play-distributed build. A
 Google Play license-test Annual subscription opened the native billing sheet, completed without a
 charge, and activated the case-sensitive `Pro` entitlement in the app. This proves the production
-SDK/store path, but it is not real revenue. The next release gates are the stable-session voice
-criterion, the three-scenario practice loop, the required Play closed-test/production-access path,
-and the first public customer transaction.
+SDK/store path, but it is not real revenue. Closed testing, production access, and the public Play
+release are complete. Real customer conversion and retention remain post-launch evidence targets.
 
 ## Repository layout
 
@@ -86,9 +89,10 @@ pnpm dev:mobile
 ## Privacy stance
 
 Raw microphone audio is transported only for the active realtime rehearsal and is not retained by
-the application. Transcript text is excluded from routine diagnostics. The app does not claim that
-voice or transcript processing stays entirely on-device; production disclosures must accurately
-describe provider processing and retention controls.
+the application. Transcript text is excluded from routine diagnostics. If a user explicitly files
+a content report, the reported response and limited context are retained for up to 30 days for
+safety review. The app does not claim that voice or transcript processing stays entirely on-device;
+production disclosures accurately describe provider processing and retention controls.
 
 ## Verification
 
