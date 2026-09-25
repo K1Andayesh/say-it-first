@@ -1,6 +1,7 @@
 # Shipaton Winning Scorecard
 
-Verified against the official RevenueCat Shipaton 2026 Devpost overview and rules on 2026-08-20.
+Verified against the official RevenueCat Shipaton 2026 Devpost overview and rules, with release
+evidence refreshed on 2026-09-25.
 This document prioritises the existing requirements; it does not remove or replace any requirement
 in `Say_It_First_Codex_Requirements.md`.
 
@@ -33,22 +34,22 @@ are stable. More integrations do not improve the score unless their award can be
 
 | Gate | Required outcome | Current state |
 |---|---|---|
-| New public app | First eligible-store release during the official submission window | Pending |
-| Supported platform | Working Android app published to Google Play or Galaxy Store | Official Play closed-test build works on Samsung; public release pending |
-| RevenueCat | Official SDK powers at least one genuine in-app purchase | Play-distributed license-test subscription activates `Pro`; first non-test customer transaction pending |
-| United States access | Judge can download and use the app in the US | Pending |
-| Judge premium access | Working free trial or promo code through judging | Pending |
-| Functional fidelity | Store build matches video and written claims | Pending |
-| Demo | Public YouTube/Vimeo video under two minutes with device footage | Pending |
-| Assets | 1024 x 1024 icon and at least one 1179 x 2556 frameless screenshot | Pending |
-| Rights | Original/licensed assets and authorised third-party services | Audit pending |
-| Influencer restriction | Only one influencer category; no influencer identity/brand use without consent | Product currently compliant; final marketing audit pending |
+| New public app | First eligible-store release during the official submission window | Complete — production version 8 released 22 September 2026 |
+| Supported platform | Working Android app published to Google Play or Galaxy Store | Complete — public Google Play release verified on Samsung and the public listing |
+| RevenueCat | Official SDK powers at least one genuine in-app purchase | Complete — Play-distributed license-test subscription activates `Pro`; no customer revenue is claimed |
+| United States access | Judge can download and use the app in the US | Complete — United States is one of five launch countries |
+| Judge premium access | Working free trial or promo code through judging | Complete — reusable 60-day Google Play promotion plus a bounded reviewer fallback documented privately |
+| Functional fidelity | Store build matches video and written claims | Complete — production version 8 was used for final release verification |
+| Demo | Public YouTube/Vimeo video under two minutes with device footage | Complete — https://youtu.be/31-7EvkX-lw |
+| Assets | 1024 x 1024 icon and at least one 1179 x 2556 frameless screenshot | Complete — final icon and frameless screenshots are in the Devpost gallery |
+| Rights | Original/licensed assets and authorised third-party services | Complete for submitted materials — brand assets are generated reproducibly in-repository and no third-party identity is used |
+| Influencer restriction | Only one influencer category; no influencer identity/brand use without consent | Complete — category metadata only; no influencer identity appears in the product or marketing |
 
 ## Primary-category proof
 
 ### Realistic scenarios
 
-The release must include at least:
+The long-term catalogue target includes:
 
 - Underperformance feedback with defensive pushback.
 - Saying no to an unreasonable request without becoming evasive or hostile.
@@ -64,8 +65,8 @@ The video and judge path must show:
 2. Alex responding in character.
 3. Feedback quoting the manager's actual words.
 4. One high-impact missed opportunity.
-5. A retry from that exact moment.
-6. A concrete original-versus-revised comparison.
+5. A focused retry while the moment is fresh.
+6. A concrete original-versus-revised comparison in a future iteration.
 
 ### Confidence building
 

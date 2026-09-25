@@ -106,6 +106,10 @@ Kingdom, and the United States. The next product step is deliberately narrow: le
 practice completion, repeat use, conversion, and qualitative manager feedback before expanding the
 surface area.
 
+As of 25 September 2026, Google Play Console reports 18 production installs. That is an early reach
+signal only; we do not yet claim measured retention, conversion, paying customers, or customer
+revenue.
+
 The roadmap includes additional scenarios and personas, a highlighted-moment retry, private
 history and deletion controls, server-side entitlement enforcement, and deeper billing lifecycle
 verification for cancellation, renewal, expiry, and reinstall. License-test evidence will never be

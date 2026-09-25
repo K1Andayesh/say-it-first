@@ -18,13 +18,16 @@ written consent.
 
 ## Eligibility
 
-- First public release: pending
-- Google Play URL: pending
-- United States availability: pending
+- First public release: production version 8 released on 22 September 2026, inside the eligibility
+  window
+- Google Play URL: https://play.google.com/store/apps/details?id=app.sayitfirst
+- United States availability: complete; the app is available in the United States and four other
+  launch countries
 - RevenueCat Test Store purchase: complete on Android
 - RevenueCat Play integration: Play-distributed no-charge license-test Annual subscription
   activated `Pro`; first non-test customer transaction remains pending
-- Judge access: supplied through the submission/reviewer instructions
+- Judge access: a reusable 60-day Google Play Annual promotion and bounded in-app reviewer fallback
+  are supplied through judge-only Devpost fields; renewal behaviour is disclosed there
 - English text description: submitted with bounded production claims and public links
 - Public demo video shorter than two minutes: published at https://youtu.be/31-7EvkX-lw
 - 1024 x 1024 icon: branded asset included in the production release and submission
@@ -41,6 +44,8 @@ written consent.
 - Production access: granted by Google Play on 22 September 2026.
 - Production status: version 8 approved and publicly available in Australia, Canada, New Zealand,
   the United Kingdom, and the United States.
+- Initial production reach: Google Play Console reported 18 installs on 25 September 2026. This is
+  an install count, not evidence of retention, conversion, paid customers, or revenue.
 
 ## Technical evidence
 
@@ -57,6 +62,9 @@ written consent.
 - Samsung display-scaling regression: the original 540-density setting exposed live controls below
   the viewport. The adaptive layout shipped after physical-device regression testing kept the
   Mute and End & reflect controls accessible during a live session.
+- Samsung backgrounding regression on production version 8: leaving an active live rehearsal
+  abandoned the app's Android audio focus and returned to an explicit “Session closed safely”
+  state that explained the microphone connection had ended and offered a fresh rehearsal.
 - Per-turn WebRTC receiver evidence: the baseline and long controlled replies were classified
   `good`; the baseline received 525 packets and the long reply received 1,805 packets, both with
   zero packet loss, 1 ms reported jitter, and zero concealed samples or concealment events
@@ -67,6 +75,11 @@ written consent.
   output-buffer clear occurred
 - Observed corrected turn-latency sample: 524-695 ms, median 628 ms across six turns; sample is too
   small to claim a release P95
+- Bounded cost evidence: the selected Say It First OpenAI project reported $0.38 total spend,
+  13,580 tokens, and 35 requests for the seven days ending 25 September 2026. The visible Realtime
+  categories totalled approximately $0.373 ($0.022 audio input, $0.284 audio output, $0.024 text
+  input, $0.042 text output, and $0.001 cached text input). This window includes QA activity and is
+  not represented as a per-practice cost or customer-usage metric.
 - Android audio evidence: app received audio focus, selected communication mode and loudspeaker,
   and restored the audio session on teardown
 - Grounded evaluation: 12-turn transcript accepted, exact-quote validation completed, evaluator
@@ -79,13 +92,16 @@ written consent.
   access is restricted to the current test app user ID
 - Production RevenueCat Play app for `app.sayitfirst` returns the live Monthly and Annual packages;
   a Play license-test Annual subscription activated `Pro` in the official store build
+- Production version 8 restore regression on 25 September 2026: after the time-compressed license
+  subscription was no longer active, Restore purchases completed safely and displayed “No active
+  Pro purchase was found for this account” rather than retaining stale access or failing silently
 - Personal EAS project `@keyvan.andayesh/say-it-first` linked; Test Store keys are isolated to
   development/preview and the Play public SDK key is configured only in the production environment
-- Standard provider secret absent from mobile bundle: architecture enforced; production AAB audit
-  remains pending
-- Automated verification: full repository lint, strict TypeScript, 32 automated tests, API/shared
-  builds, and Android export passed on 17 September 2026. A separately signed Android lab build
-  passed on 29 August 2026; this does not substitute for version 6 Play-device QA.
+- Standard provider secret absent from tracked source and the exported mobile bundle: architecture
+  enforced; no secret-pattern match was found in tracked repository files on 25 September 2026
+- Automated verification: full repository lint, strict TypeScript, 41 automated tests, API/shared
+  builds, and Android export passed on 25 September 2026. A separately signed Android lab build
+  passed on 29 August 2026, and production version 8 subsequently passed Play-device QA.
 - New Say It First launcher, adaptive, monochrome, and splash assets were generated reproducibly,
   visually checked, included in production version 8, and reflected in the public store listing.
 
@@ -93,9 +109,9 @@ written consent.
 
 | Official criterion | Required product evidence | Status |
 |---|---|---|
-| Realistic scenarios | Three Phase 1 scenarios for underperformance feedback, saying no, and after-hours boundaries, with credible pushback | Underperformance/defensive spike implemented; catalogue pending |
-| Practice and feedback | Spoken active rehearsal, transcript-grounded evaluation, and retry of a highlighted moment | Spike and grounded evaluation implemented; retry product flow pending |
-| Confidence building | Explicit before/after preparedness rating and visible improvement comparison | Pending |
+| Realistic scenarios | A credible career-coaching rehearsal with resistance and consequences | Underperformance feedback with defensive pushback is implemented and shipped; catalogue expansion is post-judging work |
+| Practice and feedback | Spoken active rehearsal, transcript-grounded evaluation, and a focused retry | Shipped voice rehearsal, grounded debrief, exact coached sentence, and Pro retry path are present in version 8 |
+| Confidence building | Feedback that gives the manager a concrete next step | Shipped debrief identifies the strongest grounded moment and an exact next sentence; explicit before/after preparedness remains post-judging work |
 
 ## Submission evidence policy
 
