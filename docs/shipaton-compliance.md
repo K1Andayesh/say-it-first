@@ -1,6 +1,8 @@
 # Shipaton Compliance Evidence
 
-Status: active during Phase 1, Checkpoint 1. Official rules rechecked 2026-08-20.
+Status: release-current as of 2026-09-25. Say It First is publicly available on Google Play and the
+Devpost entry is submitted. The rules were last rechecked on 2026-09-17 (including the August 31
+update).
 
 Authoritative competition sources:
 
@@ -22,23 +24,23 @@ written consent.
 - RevenueCat Test Store purchase: complete on Android
 - RevenueCat Play integration: Play-distributed no-charge license-test Annual subscription
   activated `Pro`; first non-test customer transaction remains pending
-- Judge access: pending
-- English text description: draft complete; final production claims and links pending
-- Public demo video shorter than two minutes: pending
-- 1024 x 1024 icon: pending
-- 1179 x 2556 frameless screenshot: pending
-- Category-specific submission copy: draft complete; final production evidence pending
+- Judge access: supplied through the submission/reviewer instructions
+- English text description: submitted with bounded production claims and public links
+- Public demo video shorter than two minutes: published at https://youtu.be/31-7EvkX-lw
+- 1024 x 1024 icon: branded asset included in the production release and submission
+- 1179 x 2556 frameless screenshot: included in the submission gallery
+- Category-specific submission copy: submitted with verified production evidence
 
 ## Play production access
 
 - Account type: personal developer account
 - Account creation date: not recorded in this repository
 - Verification status: complete enough to create and distribute the app
-- App/test status: official closed test active; five addresses are allowlisted and the Samsung test
-  account is opted in
-- Existing production access: none confirmed
-- Closed-test requirement applies: active; required tester count/duration and production-access
-  approval remain release gates
+- App/test status: the closed-test count and duration requirements were completed; version 6 was
+  available to closed testers before the production submission.
+- Production access: granted by Google Play on 22 September 2026.
+- Production status: version 8 approved and publicly available in Australia, Canada, New Zealand,
+  the United Kingdom, and the United States.
 
 ## Technical evidence
 
@@ -53,8 +55,8 @@ written consent.
   requested completion phrase. The same Play build produced a grounded debrief and clean WebRTC,
   microphone, audio-focus, and network teardown.
 - Samsung display-scaling regression: the original 540-density setting exposed live controls below
-  the viewport after transcript growth. The adaptive live layout now keeps Mute and End & reflect
-  fully visible before and after a completed turn at that exact setting.
+  the viewport. The adaptive layout shipped after physical-device regression testing kept the
+  Mute and End & reflect controls accessible during a live session.
 - Per-turn WebRTC receiver evidence: the baseline and long controlled replies were classified
   `good`; the baseline received 525 packets and the long reply received 1,805 packets, both with
   zero packet loss, 1 ms reported jitter, and zero concealed samples or concealment events
@@ -81,8 +83,11 @@ written consent.
   development/preview and the Play public SDK key is configured only in the production environment
 - Standard provider secret absent from mobile bundle: architecture enforced; production AAB audit
   remains pending
-- Automated verification: full repository lint, strict TypeScript, 30 automated tests, API/shared
-  builds, Android export, and a separately signed Android lab build passed on 29 August 2026
+- Automated verification: full repository lint, strict TypeScript, 32 automated tests, API/shared
+  builds, and Android export passed on 17 September 2026. A separately signed Android lab build
+  passed on 29 August 2026; this does not substitute for version 6 Play-device QA.
+- New Say It First launcher, adaptive, monochrome, and splash assets were generated reproducibly,
+  visually checked, included in production version 8, and reflected in the public store listing.
 
 ## Primary category evidence matrix
 

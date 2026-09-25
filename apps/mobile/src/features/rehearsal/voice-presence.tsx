@@ -7,6 +7,7 @@ import type { VoicePresence as VoicePresenceState } from "./use-rehearsal-contro
 
 const presenceCopy: Record<VoicePresenceState, string> = {
   quiet: "Room closed",
+  waiting: "Hold when you’re ready",
   listening: "Listening to you",
   thinking: "Considering your words",
   speaking: "Employee is responding",
@@ -21,7 +22,7 @@ export function VoicePresence({ state, compact = false }: VoicePresenceProps) {
   const breathe = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (state === "quiet") {
+    if (state === "quiet" || state === "waiting") {
       breathe.stopAnimation();
       breathe.setValue(0);
       return;

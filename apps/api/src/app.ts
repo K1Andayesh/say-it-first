@@ -18,6 +18,7 @@ import {
   UnavailableRealtimeProvider,
 } from "./providers/unavailable-providers.js";
 import { registerEvaluationRoutes } from "./routes/evaluations.js";
+import { registerContentReportRoutes } from "./routes/content-reports.js";
 import { registerHealthRoutes } from "./routes/health.js";
 import { registerLegalRoutes } from "./routes/legal.js";
 import { registerRealtimeRoutes } from "./routes/realtime.js";
@@ -114,6 +115,7 @@ export async function buildApp(
   registerScenarioRoutes(fastify);
   registerRealtimeRoutes(fastify, { realtimeProvider });
   registerEvaluationRoutes(fastify, { evaluationProvider });
+  registerContentReportRoutes(fastify);
 
   fastify.setNotFoundHandler(async (request, reply) => {
     return reply.status(404).send(

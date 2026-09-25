@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -40,6 +41,7 @@ const legalCopy: Record<LegalDocument, readonly string[]> = {
     "During a rehearsal, microphone audio and transcript events are processed by our AI provider to run the conversation and prepare feedback. Raw audio and transcript text are not retained by the Say It First API by default.",
     "Google Play processes payment details. RevenueCat receives purchase and entitlement records so the app can unlock Pro. Say It First does not receive your full payment-card details.",
     "Operational diagnostics may include timing, connection, purchase status and error codes. They exclude routine audio, transcript text, credentials and payment details.",
+    "Routine diagnostics are retained for 30 days. If you explicitly report an AI response, the selected Alex response, your report reason, and safety identifiers are retained for 30 days so we can investigate and improve safeguards. Your microphone audio and other transcript turns are not included in that report.",
   ],
   terms: [
     "Say It First is a private rehearsal and coaching aid. It is not legal, medical, employment-relations or professional HR advice, and it does not make decisions about employees.",
@@ -137,6 +139,8 @@ export function ProPaywall({ visible, source, onClose }: ProPaywallProps) {
   const [busyAction, setBusyAction] = useState<"purchase" | "restore" | "manage" | null>(null);
   const [result, setResult] = useState<BillingActionResult | null>(null);
   const [legalDocument, setLegalDocument] = useState<LegalDocument | null>(null);
+  const [reviewerAccessOpen, setReviewerAccessOpen] = useState(false);
+  const [reviewerCode, setReviewerCode] = useState("");
 
   const monthly = billing.plans.find((plan) => plan.period === "monthly") ?? null;
   const annual = billing.plans.find((plan) => plan.period === "annual") ?? null;
@@ -152,6 +156,8 @@ export function ProPaywall({ visible, source, onClose }: ProPaywallProps) {
     if (!visible) return;
     setResult(null);
     setLegalDocument(null);
+    setReviewerAccessOpen(false);
+    setReviewerCode("");
     billing.recordPaywallViewed(source);
     void billing.refresh();
   }, [billing.recordPaywallViewed, billing.refresh, source, visible]);
@@ -203,6 +209,20 @@ export function ProPaywall({ visible, source, onClose }: ProPaywallProps) {
     setBusyAction(null);
   };
 
+  const activateReviewerAccess = async () => {
+    if (busyAction || !reviewerCode.trim()) return;
+    setBusyAction("restore");
+    setResult(null);
+    const next = await billing.activateReviewerAccess(reviewerCode);
+    setResult(next);
+    setBusyAction(null);
+    await Haptics.notificationAsync(
+      resultIsPositive(next)
+        ? Haptics.NotificationFeedbackType.Success
+        : Haptics.NotificationFeedbackType.Warning,
+    );
+  };
+
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={onClose}>
       <LinearGradient colors={["#0A0B14", "#12101C", "#090A12"]} style={styles.background}>
@@ -248,6 +268,61 @@ export function ProPaywall({ visible, source, onClose }: ProPaywallProps) {
                   </View>
                 ))}
               </View>
+
+              {!billing.isPro ? (
+                <View style={styles.reviewerCard}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityState={{ expanded: reviewerAccessOpen }}
+                    accessibilityLabel="Play reviewer access"
+                    onPress={() => setReviewerAccessOpen((open) => !open)}
+                    style={({ pressed }) => [styles.reviewerHeader, pressed && styles.pressed]}
+                  >
+                    <View>
+                      <Text style={styles.reviewerEyebrow}>GOOGLE PLAY</Text>
+                      <Text style={styles.reviewerTitle}>Play reviewer access</Text>
+                    </View>
+                    <Text style={styles.reviewerChevron}>{reviewerAccessOpen ? "−" : "+"}</Text>
+                  </Pressable>
+                  {reviewerAccessOpen ? (
+                    <View style={styles.reviewerBody}>
+                      <Text style={styles.reviewerCopy}>
+                        Enter the access code supplied in the Play Console review instructions. No purchase is required.
+                      </Text>
+                      <TextInput
+                        accessibilityLabel="Play review access code"
+                        autoCapitalize="characters"
+                        autoCorrect={false}
+                        editable={busyAction === null}
+                        onChangeText={setReviewerCode}
+                        onSubmitEditing={() => void activateReviewerAccess()}
+                        placeholder="Access code"
+                        placeholderTextColor={palette.ivoryMuted}
+                        returnKeyType="done"
+                        secureTextEntry
+                        style={styles.reviewerInput}
+                        value={reviewerCode}
+                      />
+                      <Pressable
+                        accessibilityRole="button"
+                        disabled={busyAction !== null || !reviewerCode.trim()}
+                        onPress={() => void activateReviewerAccess()}
+                        style={({ pressed }) => [
+                          styles.reviewerButton,
+                          (busyAction !== null || !reviewerCode.trim()) && styles.disabled,
+                          pressed && styles.pressed,
+                        ]}
+                      >
+                        {busyAction === "restore" ? (
+                          <ActivityIndicator color={palette.ink} />
+                        ) : (
+                          <Text style={styles.reviewerButtonText}>Activate review access</Text>
+                        )}
+                      </Pressable>
+                    </View>
+                  ) : null}
+                </View>
+              ) : null}
 
               {!billing.isPro ? (
                 <View style={styles.plansSection} accessibilityRole="radiogroup">
@@ -318,7 +393,7 @@ export function ProPaywall({ visible, source, onClose }: ProPaywallProps) {
                     ) : (
                       <>
                         <Text style={styles.primaryButtonText}>
-                          {selectedPlan ? `Continue with ${selectedPlan.period}` : "Select a plan"}
+                          {selectedPlan ? "Continue" : "Select a plan"}
                         </Text>
                         {selectedPlan ? <Text style={styles.primaryButtonPrice}>{selectedPlan.priceString}</Text> : null}
                       </>
@@ -444,6 +519,47 @@ const styles = StyleSheet.create({
   },
   checkGlyph: { fontSize: 12, fontWeight: "800", color: palette.cyan },
   benefitText: { flex: 1, fontSize: 14, lineHeight: 20, color: palette.ivory },
+  reviewerCard: {
+    marginTop: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: palette.line,
+    backgroundColor: "rgba(255,255,255,0.035)",
+    overflow: "hidden",
+  },
+  reviewerHeader: {
+    minHeight: 66,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  reviewerEyebrow: { fontSize: 8, fontWeight: "800", letterSpacing: 1.45, color: palette.cyan },
+  reviewerTitle: { ...typography.label, color: palette.ivory, marginTop: 4 },
+  reviewerChevron: { fontSize: 22, fontWeight: "300", color: palette.ivoryMuted },
+  reviewerBody: { paddingHorizontal: spacing.md, paddingBottom: spacing.md, gap: 10 },
+  reviewerCopy: { fontSize: 12, lineHeight: 18, color: palette.ivoryMuted },
+  reviewerInput: {
+    minHeight: 50,
+    borderWidth: 1,
+    borderColor: palette.lineStrong,
+    borderRadius: radius.sm,
+    backgroundColor: palette.ink,
+    color: palette.ivory,
+    fontSize: 15,
+    letterSpacing: 1.2,
+    paddingHorizontal: 14,
+  },
+  reviewerButton: {
+    minHeight: 50,
+    borderRadius: radius.sm,
+    backgroundColor: palette.cyan,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
+  reviewerButtonText: { ...typography.label, color: palette.ink },
   plansSection: { marginTop: spacing.lg, gap: 10 },
   sectionHeadingRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", minHeight: 24 },
   sectionHeading: { ...typography.eyebrow, color: palette.ivoryMuted, letterSpacing: 1.7 },
@@ -525,8 +641,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 9 },
     elevation: 7,
   },
-  primaryButtonText: { fontSize: 16, fontWeight: "800", color: palette.ink, textTransform: "capitalize" },
-  primaryButtonPrice: { fontSize: 14, fontWeight: "700", color: "rgba(9,10,18,0.7)" },
+  primaryButtonText: { flexShrink: 1, fontSize: 16, fontWeight: "800", color: palette.ink, textTransform: "capitalize" },
+  primaryButtonPrice: { flexShrink: 0, marginLeft: 12, fontSize: 14, fontWeight: "700", color: "rgba(9,10,18,0.7)", textAlign: "right" },
   disabled: { opacity: 0.45 },
   pressed: { opacity: 0.88, transform: [{ scale: 0.985 }] },
   storeAssurance: { fontSize: 10, lineHeight: 15, color: palette.ivoryMuted, textAlign: "center", marginTop: 11, maxWidth: 330 },

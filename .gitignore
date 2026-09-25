@@ -17,3 +17,11 @@ ios/
 apps/mobile/.eas/
 .artifacts/
 _archive/
+
+# Local release bundles and device-QA captures
+/artifacts/
+/app.json
+/apps/mobile/*.aab
+/*.xml
+/parallel*.png
+/sayitfirst-account.png

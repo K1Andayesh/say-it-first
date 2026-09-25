@@ -1,7 +1,7 @@
 # Devpost Submission Draft
 
-Status: working draft created 21 August 2026. Replace pending release evidence with verified public
-URLs and production results before submitting.
+Status: release-current draft updated 25 September 2026. Public Play availability is verified;
+customer revenue is not claimed.
 
 ## Project name
 
@@ -101,20 +101,15 @@ manager.
 
 ### What's next for Say It First
 
-Before public release we will complete the three-scenario, two-persona Phase 1 practice loop,
-preparedness comparison, highlighted-moment retry, history/deletion, server-side entitlement
-enforcement, Play-listing alignment with the hosted privacy/support pages, and production
-monitoring.
+Say It First is now publicly available on Google Play in Australia, Canada, New Zealand, the United
+Kingdom, and the United States. The next product step is deliberately narrow: learn from real
+practice completion, repeat use, conversion, and qualitative manager feedback before expanding the
+surface area.
 
-The official app and Monthly/Annual offers are now distributed through Play closed testing, and the
-production RevenueCat path has activated `Pro` from a Play license-test subscription. Before public
-release we will complete the required tester count/duration and production-access review, then
-verify cancellation, renewal, expiry, reinstall, developer notifications, and banking-app return.
-License-test evidence will never be presented as customer revenue.
-
-After launch, the focus moves to real evidence: practice completion, repeat use, conversion,
-revenue, qualitative manager feedback, and the product changes those signals cause. A useful
-OneSignal reminder and deep link will be added only after the core return loop is stable.
+The roadmap includes additional scenarios and personas, a highlighted-moment retry, private
+history and deletion controls, server-side entitlement enforcement, and deeper billing lifecycle
+verification for cancellation, renewal, expiry, and reinstall. License-test evidence will never be
+presented as customer revenue.
 
 ## Built with
 
@@ -137,11 +132,16 @@ Influencer Award — Career Coaching: Leadership Heather
 The product and marketing must not use the influencer's name, likeness, voice, brand, logo, or
 identifying features without written consent. The category name above is submission metadata only.
 
-## Final evidence still required
+## Submission evidence
 
-- Public Google Play URL and first-release date inside the eligibility window.
-- United States availability and judge access.
-- First non-test customer transaction plus the remaining RevenueCat lifecycle tests.
-- Public demo video under two minutes.
-- 1024 x 1024 icon and 1179 x 2556 frameless screenshot.
-- Final production metrics, user feedback, and public build-in-public links.
+- Public Google Play URL: https://play.google.com/store/apps/details?id=app.sayitfirst
+- First public release verified inside the Shipaton eligibility window.
+- Launch availability configured for Australia, Canada, New Zealand, the United Kingdom, and the
+  United States.
+- Reviewer access is documented privately in Google Play Console; no access credential belongs in
+  the public Devpost story.
+- Public demo video: https://youtu.be/31-7EvkX-lw
+- The gallery includes the final thumbnail and exact-size app screenshots.
+- License-test purchases prove the RevenueCat integration without being represented as customer
+  revenue.
+- Public Devpost project: https://devpost.com/software/say-it-first

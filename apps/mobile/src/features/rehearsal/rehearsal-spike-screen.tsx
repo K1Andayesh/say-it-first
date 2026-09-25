@@ -6,6 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { palette, radius, spacing, typography } from "@/design/tokens";
 import { ProPaywall } from "@/features/billing/pro-paywall";
 import { useBilling } from "@/services/billing/billing-provider";
+import { ContentReportModal } from "./content-report-modal";
 import { TranscriptPanel } from "./transcript-panel";
 import { useRehearsalController } from "./use-rehearsal-controller";
 import { VoicePresence } from "./voice-presence";
@@ -68,6 +69,7 @@ export function RehearsalSpikeScreen() {
   const billing = useBilling();
   const [paywallVisible, setPaywallVisible] = useState(false);
   const [paywallSource, setPaywallSource] = useState<"header" | "post_evaluation">("header");
+  const [reportVisible, setReportVisible] = useState(false);
   const { width, height } = useWindowDimensions();
   const compact = width < 380;
   const compactLive = height < 720;
@@ -78,6 +80,9 @@ export function RehearsalSpikeScreen() {
   const isConnecting = state === "authorising" || state === "connecting";
   const isEvaluating = state === "ending" || state === "evaluating";
   const isLive = ["ready", "active", "paused"].includes(state);
+  const latestAlexTurn = [...controller.transcript]
+    .reverse()
+    .find((turn) => turn.speaker === "employee") ?? null;
 
   return (
     <LinearGradient
@@ -208,26 +213,53 @@ export function RehearsalSpikeScreen() {
             ) : null}
 
             <View style={styles.liveControls}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={controller.muted ? "Unmute microphone" : "Mute microphone"}
-                onPress={controller.toggleMute}
-                disabled={!isLive}
-                style={({ pressed }) => [
-                  styles.secondaryControl,
-                  controller.muted && styles.secondaryControlActive,
-                  pressed && styles.controlPressed,
-                  !isLive && styles.buttonDisabled,
-                ]}
-              >
-                <View style={styles.micGlyph}>
-                  <View style={styles.micCapsule} />
-                  <View style={styles.micStem} />
-                </View>
-                <Text style={styles.secondaryControlLabel}>
-                  {controller.muted ? "Unmute" : "Mute"}
-                </Text>
-              </Pressable>
+              {controller.holdToTalkEnabled ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Hold to speak uninterrupted"
+                  accessibilityHint="Keep holding while you talk, then release to send your turn"
+                  onPressIn={controller.beginHoldToTalk}
+                  onPressOut={controller.endHoldToTalk}
+                  disabled={!isLive}
+                  style={({ pressed }) => [
+                    styles.holdControl,
+                    (pressed || controller.holdingToTalk) && styles.holdControlActive,
+                    !isLive && styles.buttonDisabled,
+                  ]}
+                >
+                  <View style={styles.micGlyph}>
+                    <View style={styles.micCapsule} />
+                    <View style={styles.micStem} />
+                  </View>
+                  <View>
+                    <Text style={styles.holdControlLabel}>
+                      {controller.holdingToTalk ? "Speaking…" : "Hold to speak"}
+                    </Text>
+                    <Text style={styles.holdControlHint}>Release when finished</Text>
+                  </View>
+                </Pressable>
+              ) : (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={controller.muted ? "Unmute microphone" : "Mute microphone"}
+                  onPress={controller.toggleMute}
+                  disabled={!isLive}
+                  style={({ pressed }) => [
+                    styles.secondaryControl,
+                    controller.muted && styles.secondaryControlActive,
+                    pressed && styles.controlPressed,
+                    !isLive && styles.buttonDisabled,
+                  ]}
+                >
+                  <View style={styles.micGlyph}>
+                    <View style={styles.micCapsule} />
+                    <View style={styles.micStem} />
+                  </View>
+                  <Text style={styles.secondaryControlLabel}>
+                    {controller.muted ? "Unmute" : "Mute"}
+                  </Text>
+                </Pressable>
+              )}
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="End rehearsal and get feedback"
@@ -244,6 +276,37 @@ export function RehearsalSpikeScreen() {
                   {isEvaluating ? "Preparing feedback…" : "End & reflect"}
                 </Text>
               </Pressable>
+            </View>
+            <View style={styles.liveMetaActions}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={
+                  controller.holdToTalkEnabled
+                    ? "Use automatic conversation turns"
+                    : "Use hold to talk for an uninterrupted turn"
+                }
+                onPress={controller.toggleHoldToTalk}
+                disabled={!isLive}
+                style={({ pressed }) => [
+                  styles.turnModeControl,
+                  pressed && styles.turnModeControlPressed,
+                  !isLive && styles.buttonDisabled,
+                ]}
+              >
+                <Text style={styles.turnModeControlLabel}>
+                  {controller.holdToTalkEnabled ? "Automatic turns" : "Use hold-to-talk"}
+                </Text>
+              </Pressable>
+              {latestAlexTurn ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Report Alex AI response"
+                  onPress={() => setReportVisible(true)}
+                  style={({ pressed }) => [styles.reportLink, pressed && styles.turnModeControlPressed]}
+                >
+                  <Text style={styles.reportLinkText}>Report AI response</Text>
+                </Pressable>
+              ) : null}
             </View>
             <Text style={styles.livePrivacy}>MICROPHONE CONNECTION CLOSES WHEN YOU END OR LEAVE</Text>
           </View>
@@ -335,6 +398,25 @@ export function RehearsalSpikeScreen() {
                   setPaywallVisible(true);
                 }}
               />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Back to rehearsal home"
+                onPress={controller.reset}
+                style={({ pressed }) => [styles.backToHomeButton, pressed && styles.controlPressed]}
+              >
+                <Text style={styles.backToHomeGlyph}>←</Text>
+                <Text style={styles.backToHomeLabel}>Back to rehearsal home</Text>
+              </Pressable>
+              {latestAlexTurn ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Report Alex AI response"
+                  onPress={() => setReportVisible(true)}
+                  style={({ pressed }) => [styles.reportResultButton, pressed && styles.controlPressed]}
+                >
+                  <Text style={styles.reportResultText}>Report AI response</Text>
+                </Pressable>
+              ) : null}
               <Text style={styles.resultsPrivacy}>Nothing was sent to your workplace.</Text>
             </View>
           </ScrollView>
@@ -365,6 +447,13 @@ export function RehearsalSpikeScreen() {
         visible={paywallVisible}
         source={paywallSource}
         onClose={() => setPaywallVisible(false)}
+      />
+      <ContentReportModal
+        visible={reportVisible}
+        turn={latestAlexTurn}
+        scenarioId={controller.scenario.id}
+        personaId={controller.persona.id}
+        onClose={() => setReportVisible(false)}
       />
     </LinearGradient>
   );
@@ -553,6 +642,25 @@ const styles = StyleSheet.create({
   },
   secondaryControlActive: { borderColor: palette.coral, backgroundColor: "rgba(255,107,95,0.1)" },
   secondaryControlLabel: { ...typography.label, color: palette.ivory },
+  holdControl: {
+    minWidth: 150,
+    height: 57,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: "rgba(108,229,212,0.45)",
+    backgroundColor: "rgba(108,229,212,0.08)",
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  holdControlActive: {
+    borderColor: palette.cyan,
+    backgroundColor: "rgba(108,229,212,0.2)",
+    transform: [{ scale: 0.985 }],
+  },
+  holdControlLabel: { ...typography.label, color: palette.ivory },
+  holdControlHint: { fontSize: 9, color: palette.ivoryMuted, marginTop: 2 },
   endControl: {
     flex: 1,
     height: 57,
@@ -565,6 +673,19 @@ const styles = StyleSheet.create({
   },
   endControlLabel: { ...typography.label, color: palette.ink },
   controlPressed: { transform: [{ scale: 0.975 }], opacity: 0.88 },
+  liveMetaActions: {
+    minHeight: 36,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    columnGap: spacing.sm,
+  },
+  turnModeControl: { minHeight: 36, justifyContent: "center", paddingHorizontal: 8 },
+  turnModeControlPressed: { opacity: 0.72 },
+  turnModeControlLabel: { fontSize: 11, fontWeight: "700", color: palette.cyan, textDecorationLine: "underline" },
+  reportLink: { minHeight: 36, justifyContent: "center", paddingHorizontal: 8 },
+  reportLinkText: { fontSize: 10, color: palette.ivoryMuted, textDecorationLine: "underline" },
   micGlyph: { width: 15, height: 21, alignItems: "center" },
   micCapsule: {
     width: 8,
@@ -642,6 +763,20 @@ const styles = StyleSheet.create({
   proCardTitle: { ...typography.title, fontSize: 21, lineHeight: 26, color: palette.ivory, marginTop: 15 },
   proCardBody: { fontSize: 13, lineHeight: 20, color: palette.ivoryMuted, marginTop: 8 },
   resultsAction: { marginTop: spacing.lg, gap: 12 },
+  backToHomeButton: {
+    minHeight: 48,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: palette.lineStrong,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 9,
+  },
+  backToHomeGlyph: { fontSize: 18, color: palette.ivory },
+  backToHomeLabel: { ...typography.label, color: palette.ivory },
+  reportResultButton: { minHeight: 44, alignItems: "center", justifyContent: "center" },
+  reportResultText: { fontSize: 11, color: palette.ivoryMuted, textDecorationLine: "underline" },
   resultsPrivacy: { textAlign: "center", fontSize: 11, color: palette.ivoryMuted },
   recoveryContent: {
     flex: 1,

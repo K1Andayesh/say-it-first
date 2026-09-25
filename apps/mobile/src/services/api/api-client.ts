@@ -2,12 +2,16 @@ import * as Crypto from "expo-crypto";
 
 import {
   apiErrorResponseSchema,
+  createContentReportResponseSchema,
   evaluatePracticeResponseSchema,
+  type CreateContentReportRequest,
+  type CreateContentReportResponse,
   type EvaluatePracticeRequest,
   type EvaluatePracticeResponse,
 } from "@say-it-first/contracts";
 
 import { diagnosticLog } from "@/services/diagnostics/diagnostic-log";
+import { getOrCreateAnonymousUserId } from "@/services/identity/anonymous-id";
 
 const configuredApiBaseUrl: unknown = process.env.EXPO_PUBLIC_API_BASE_URL;
 const apiBaseUrl =
@@ -97,6 +101,57 @@ export async function evaluatePractice(
     requestId: result.meta.requestId,
     traceId: result.meta.traceId,
     model: result.meta.model,
+    durationMs,
+  });
+  return result;
+}
+
+export async function reportAiContent(
+  input: CreateContentReportRequest,
+): Promise<CreateContentReportResponse> {
+  const correlation = createCorrelation();
+  const anonymousUserId = await getOrCreateAnonymousUserId();
+  const startedAt = performance.now();
+  diagnosticLog.record("info", "api.content_report.requested", {
+    requestId: correlation.requestId,
+    traceId: correlation.traceId,
+    reason: input.reason,
+  });
+
+  const response = await fetchWithTimeout(`${apiBaseUrl}/api/v1/content-reports`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-anonymous-user-id": anonymousUserId,
+      "x-request-id": correlation.requestId,
+      traceparent: correlation.traceparent,
+    },
+    body: JSON.stringify(input),
+  }, 15_000);
+
+  const durationMs = Math.round(performance.now() - startedAt);
+  const body: unknown = await response.json();
+  if (!response.ok) {
+    const parsedError = apiErrorResponseSchema.safeParse(body);
+    diagnosticLog.record("warn", "api.content_report.failed", {
+      requestId: correlation.requestId,
+      traceId: correlation.traceId,
+      statusCode: response.status,
+      durationMs,
+    });
+    throw new ApiClientError(
+      parsedError.success ? parsedError.data.error.message : "The report could not be sent.",
+      parsedError.success ? parsedError.data.error.retryable : response.status >= 500,
+      parsedError.success ? parsedError.data.error.requestId : correlation.requestId,
+      parsedError.success ? parsedError.data.error.traceId : correlation.traceId,
+    );
+  }
+
+  const result = createContentReportResponseSchema.parse(body);
+  diagnosticLog.record("info", "api.content_report.completed", {
+    requestId: result.meta.requestId,
+    traceId: result.meta.traceId,
+    reportId: result.reportId,
     durationMs,
   });
   return result;

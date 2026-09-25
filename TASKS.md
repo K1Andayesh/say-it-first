@@ -1,5 +1,22 @@
 # Active Tasks
 
+## Release-first sprint — completed 25 September 2026
+
+- [x] Recheck current Play status and the official Shipaton rules.
+- [x] Send closed-test version 6 to Google for review; it appeared under "Changes in review"
+      while automated quick checks were running. Do not call it available to testers yet.
+- [x] Re-run lint, TypeScript, 32 automated tests, and Android export.
+- [x] Replace the scaffold Expo icon with reproducible Say It First launcher/adaptive/splash
+      artwork in source. This artwork is not in Play version 6.
+- [x] Complete Play-distributed physical-device QA, including the 540-density layout, complete
+      audible responses, grounded debrief, purchase/restore, and clean session teardown.
+- [x] Prepare and verify a new store build containing the branded icon and confirmed release fixes.
+- [x] Complete the closed-test gate and receive Google Play production access.
+- [x] Publish the Play listing in Australia, Canada, New Zealand, the United Kingdom, and the
+      United States, with truthful judge access and RevenueCat integration evidence.
+- [x] Publish the public demo video, submission gallery assets, and final Devpost entry.
+- [x] Verify the public store listing and shipped build before Devpost submission.
+
 ## Phase 1 — Checkpoint 1
 
 - [x] Confirm workspace and local Android/Node toolchain.

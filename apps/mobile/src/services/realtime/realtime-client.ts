@@ -25,6 +25,13 @@ import {
   type AssistantAudioGateState,
   type RealtimeEvent,
 } from "./realtime-events";
+import {
+  holdToTalkFinishEvents,
+  holdToTalkStartEvents,
+  turnModeUpdateEvent,
+  type RealtimeClientEvent,
+  type RealtimeTurnMode,
+} from "./realtime-turn-control";
 
 export type RealtimeConnectionState =
   | "connecting"
@@ -104,6 +111,8 @@ export class RealtimeVoiceClient {
   private localStream: MediaStream | null = null;
   private stopped = false;
   private userMuted = false;
+  private turnMode: RealtimeTurnMode = "automatic";
+  private holdToTalkActive = false;
   private assistantAudioGate: AssistantAudioGateState = idleAssistantAudioGateState;
   private microphoneEnabled: boolean | null = null;
   private lastSpeechStoppedAt: number | null = null;
@@ -116,6 +125,8 @@ export class RealtimeVoiceClient {
     if (this.peerConnection) throw new Error("A realtime session is already active.");
     this.stopped = false;
     this.userMuted = false;
+    this.turnMode = "automatic";
+    this.holdToTalkActive = false;
     this.assistantAudioGate = idleAssistantAudioGateState;
     this.microphoneEnabled = null;
     this.lastSpeechStoppedAt = null;
@@ -243,9 +254,77 @@ export class RealtimeVoiceClient {
   }
 
   public setMuted(muted: boolean): void {
+    if (this.turnMode === "hold_to_talk") return;
     this.userMuted = muted;
     this.syncMicrophone("user_control");
     diagnosticLog.record("info", "realtime.microphone.changed", { muted });
+  }
+
+  public setTurnMode(mode: RealtimeTurnMode): boolean {
+    if (this.turnMode === mode) return true;
+    if (!this.sendClientEvent(turnModeUpdateEvent(mode))) return false;
+
+    this.turnMode = mode;
+    this.holdToTalkActive = false;
+    this.userMuted = mode === "hold_to_talk";
+    this.syncMicrophone("turn_mode_changed");
+    diagnosticLog.record("info", "realtime.turn_control.mode_changed", { mode });
+    return true;
+  }
+
+  public beginHoldToTalk(): boolean {
+    if (this.turnMode !== "hold_to_talk" || this.holdToTalkActive) return false;
+    const assistantActive =
+      this.assistantAudioGate.responseActive || this.assistantAudioGate.audioPlaying;
+    const events = holdToTalkStartEvents(assistantActive);
+    if (!events.every((event) => this.sendClientEvent(event))) return false;
+
+    if (assistantActive) {
+      this.assistantAudioGate = idleAssistantAudioGateState;
+      this.qualityBaseline = null;
+    }
+    this.holdToTalkActive = true;
+    this.userMuted = false;
+    this.syncMicrophone("hold_to_talk_started");
+    diagnosticLog.record("info", "realtime.turn_control.hold_started", {
+      interruptedAssistant: assistantActive,
+    });
+    return true;
+  }
+
+  public endHoldToTalk(): boolean {
+    if (this.turnMode !== "hold_to_talk" || !this.holdToTalkActive) return false;
+    this.holdToTalkActive = false;
+    this.userMuted = true;
+    this.syncMicrophone("hold_to_talk_released");
+    const sent = holdToTalkFinishEvents().every((event) => this.sendClientEvent(event));
+    diagnosticLog.record(sent ? "info" : "warn", "realtime.turn_control.hold_committed", {
+      sent,
+    });
+    return sent;
+  }
+
+  private sendClientEvent(event: RealtimeClientEvent): boolean {
+    const dataChannel = this.dataChannel;
+    if (!dataChannel || dataChannel.readyState !== "open") {
+      diagnosticLog.record("warn", "realtime.client_event.not_sent", {
+        eventType: event.type,
+        channelState: dataChannel?.readyState ?? "missing",
+      });
+      return false;
+    }
+
+    try {
+      dataChannel.send(JSON.stringify(event));
+      diagnosticLog.record("debug", "realtime.client_event.sent", { eventType: event.type });
+      return true;
+    } catch (error) {
+      diagnosticLog.record("warn", "realtime.client_event.failed", {
+        eventType: event.type,
+        errorType: error instanceof Error ? error.name : "UnknownError",
+      });
+      return false;
+    }
   }
 
   private handleTurnControlEvent(event: RealtimeEvent): void {
@@ -376,6 +455,8 @@ export class RealtimeVoiceClient {
     this.localStream?.getTracks().forEach((track) => track.stop());
     this.localStream?.release();
     this.localStream = null;
+    this.turnMode = "automatic";
+    this.holdToTalkActive = false;
     this.qualityBaseline = null;
     this.peerConnection?.close();
     this.peerConnection = null;

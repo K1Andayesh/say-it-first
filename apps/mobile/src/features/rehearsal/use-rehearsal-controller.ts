@@ -37,7 +37,7 @@ function requireFirst<T>(values: readonly T[], label: string): T {
 const scenario = requireFirst<ScenarioDefinition>(scenarios, "scenario");
 const persona = requireFirst<EmployeePersona>(personas, "persona");
 
-export type VoicePresence = "quiet" | "listening" | "thinking" | "speaking";
+export type VoicePresence = "quiet" | "waiting" | "listening" | "thinking" | "speaking";
 
 type RehearsalError = {
   title: string;
@@ -55,10 +55,15 @@ export type RehearsalController = {
   evaluation: PracticeEvaluation | null;
   error: RehearsalError | null;
   muted: boolean;
+  holdToTalkEnabled: boolean;
+  holdingToTalk: boolean;
   elapsedSeconds: number;
   start: () => Promise<void>;
   end: () => Promise<void>;
   toggleMute: () => void;
+  toggleHoldToTalk: () => void;
+  beginHoldToTalk: () => void;
+  endHoldToTalk: () => void;
   reset: () => void;
 };
 
@@ -94,12 +99,15 @@ export function useRehearsalController(): RehearsalController {
   const [evaluation, setEvaluation] = useState<PracticeEvaluation | null>(null);
   const [error, setError] = useState<RehearsalError | null>(null);
   const [muted, setMuted] = useState(false);
+  const [holdToTalkEnabled, setHoldToTalkEnabled] = useState(false);
+  const [holdingToTalk, setHoldingToTalk] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const clientRef = useRef<RealtimeVoiceClient | null>(null);
   const sessionStateRef = useRef<PracticeSessionState>("idle");
   const startedAtRef = useRef<number | null>(null);
   const transcriptRef = useRef<TranscriptTurn[]>([]);
   const endingRef = useRef(false);
+  const holdToTalkEnabledRef = useRef(false);
 
   const moveTo = useCallback((next: PracticeSessionState): boolean => {
     const current = sessionStateRef.current;
@@ -124,7 +132,10 @@ export function useRehearsalController(): RehearsalController {
 
   const handleRealtimeEvent = useCallback(
     (event: RealtimeEvent) => {
-      const nextPresence = presenceFromEvent(event);
+      const nextPresence =
+        event.type === "response.done" && holdToTalkEnabledRef.current
+          ? "waiting"
+          : presenceFromEvent(event);
       if (nextPresence) setVoicePresence(nextPresence);
 
       if (
@@ -192,6 +203,9 @@ export function useRehearsalController(): RehearsalController {
     replaceTranscript([]);
     setElapsedSeconds(0);
     setMuted(false);
+    setHoldToTalkEnabled(false);
+    holdToTalkEnabledRef.current = false;
+    setHoldingToTalk(false);
     setVoicePresence("quiet");
     endingRef.current = false;
     moveTo("authorising");
@@ -275,6 +289,7 @@ export function useRehearsalController(): RehearsalController {
   }, [evaluateCurrentTranscript, moveTo]);
 
   const toggleMute = useCallback(() => {
+    if (holdToTalkEnabled) return;
     const nextMuted = !muted;
     const current = sessionStateRef.current;
     if (nextMuted && current === "active") moveTo("paused");
@@ -282,7 +297,48 @@ export function useRehearsalController(): RehearsalController {
     clientRef.current?.setMuted(nextMuted);
     setMuted(nextMuted);
     void Haptics.selectionAsync();
-  }, [moveTo, muted]);
+  }, [holdToTalkEnabled, moveTo, muted]);
+
+  const toggleHoldToTalk = useCallback(() => {
+    const nextEnabled = !holdToTalkEnabled;
+    if (!clientRef.current?.setTurnMode(nextEnabled ? "hold_to_talk" : "automatic")) {
+      setError({
+        title: "Hold-to-talk is not ready yet",
+        message: "Wait for the voice connection, then try the control again.",
+        retryable: true,
+      });
+      return;
+    }
+    setError(null);
+    setHoldToTalkEnabled(nextEnabled);
+    holdToTalkEnabledRef.current = nextEnabled;
+    setHoldingToTalk(false);
+    setMuted(nextEnabled);
+    setVoicePresence(nextEnabled ? "waiting" : "listening");
+    const current = sessionStateRef.current;
+    if (nextEnabled && current === "active") moveTo("paused");
+    else if (!nextEnabled && current === "paused") moveTo("active");
+    void Haptics.selectionAsync();
+  }, [holdToTalkEnabled, moveTo]);
+
+  const beginHoldToTalk = useCallback(() => {
+    if (!holdToTalkEnabled || !clientRef.current?.beginHoldToTalk()) return;
+    const current = sessionStateRef.current;
+    if (current === "ready" || current === "paused") moveTo("active");
+    setHoldingToTalk(true);
+    setMuted(false);
+    setVoicePresence("listening");
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }, [holdToTalkEnabled, moveTo]);
+
+  const endHoldToTalk = useCallback(() => {
+    if (!holdToTalkEnabled || !clientRef.current?.endHoldToTalk()) return;
+    if (sessionStateRef.current === "active") moveTo("paused");
+    setHoldingToTalk(false);
+    setMuted(true);
+    setVoicePresence("thinking");
+    void Haptics.selectionAsync();
+  }, [holdToTalkEnabled, moveTo]);
 
   const reset = useCallback(() => {
     void clientRef.current?.stop();
@@ -295,6 +351,9 @@ export function useRehearsalController(): RehearsalController {
     setEvaluation(null);
     setError(null);
     setMuted(false);
+    setHoldToTalkEnabled(false);
+    holdToTalkEnabledRef.current = false;
+    setHoldingToTalk(false);
     setElapsedSeconds(0);
     startedAtRef.current = null;
     endingRef.current = false;
@@ -349,10 +408,15 @@ export function useRehearsalController(): RehearsalController {
     evaluation,
     error,
     muted,
+    holdToTalkEnabled,
+    holdingToTalk,
     elapsedSeconds,
     start,
     end,
     toggleMute,
+    toggleHoldToTalk,
+    beginHoldToTalk,
+    endHoldToTalk,
     reset,
   };
 }

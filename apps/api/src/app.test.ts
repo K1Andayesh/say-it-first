@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import {
+  createContentReportResponseSchema,
   evaluatePracticeResponseSchema,
   type PracticeEvaluation,
 } from "@say-it-first/contracts";
@@ -197,6 +198,55 @@ describe("API", () => {
       method: "POST",
       url: "/api/v1/evaluations",
       payload: { transcript: [{ text: secretText }] },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body).not.toContain(secretText);
+    expect(response.json()).toMatchObject({
+      error: { code: "bad_request", retryable: false },
+    });
+    await app.close();
+  });
+
+  it("accepts an explicit AI content report with trace metadata", async () => {
+    const app = await buildApp(testEnvironment, { realtimeProvider, evaluationProvider });
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/v1/content-reports",
+      headers: { "x-anonymous-user-id": randomUUID() },
+      payload: {
+        scenarioId: "scn-underperformance-feedback",
+        personaId: "persona-defensive",
+        assistantTurnId: "employee-3",
+        assistantText: "That response crossed a safety boundary.",
+        reason: "harmful_advice",
+      },
+    });
+
+    expect(response.statusCode).toBe(202);
+    const responseBody = createContentReportResponseSchema.parse(response.json());
+    expect(responseBody).toMatchObject({ accepted: true });
+    expect(responseBody.reportId).toMatch(/^[0-9a-f-]{36}$/);
+    expect(responseBody.meta.traceId).toMatch(/^[a-f0-9]{32}$/);
+    await app.close();
+  });
+
+  it("rejects an invalid AI content report without echoing its content", async () => {
+    const app = await buildApp(testEnvironment, { realtimeProvider, evaluationProvider });
+    const secretText = `PRIVATE-${"x".repeat(2_100)}`;
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/v1/content-reports",
+      headers: { "x-anonymous-user-id": randomUUID() },
+      payload: {
+        scenarioId: "scn-underperformance-feedback",
+        personaId: "persona-defensive",
+        assistantTurnId: "employee-3",
+        assistantText: secretText,
+        reason: "other",
+      },
     });
 
     expect(response.statusCode).toBe(400);
