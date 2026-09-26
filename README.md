@@ -34,6 +34,18 @@ charge, and activated the case-sensitive `Pro` entitlement in the app. This prov
 SDK/store path, but it is not real revenue. Closed testing, production access, and the public Play
 release are complete. Real customer conversion and retention remain post-launch evidence targets.
 
+## Release evidence
+
+- Production version `0.1.0` (version code 8) was released on Google Play on 22 September 2026.
+- The RevenueCat Shipaton 2026 Devpost submission was confirmed on 25 September 2026.
+- The public demo and the store build show the same voice-rehearsal, transcript-grounded coaching,
+  and RevenueCat-powered Pro experience.
+- On 26 September 2026, Google Play Console reported 15 device acquisitions, 16 device first opens,
+  and 18 monthly active devices. These are early reach signals, not retention, conversion, or
+  customer-revenue claims.
+- Premium judge access is configured privately in the Devpost submission and is intentionally not
+  published in this repository.
+
 ## Repository layout
 
 ```text
